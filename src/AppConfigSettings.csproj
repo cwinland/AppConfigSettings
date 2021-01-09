@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <AssemblyVersion>1.0.*</AssemblyVersion>
+    <Copyright>Christopher Winland(c) 2021</Copyright>
+    <RepositoryUrl>https://github.com/cwinland/AppConfigSettings</RepositoryUrl>
+    <RepositoryType>c#</RepositoryType>
+    <PackageTags>Application Configuration Settings Validation Typed AppConfig</PackageTags>
+    <Company>Microsoft</Company>
+    <Authors>Christopher Winland</Authors>
+    <Description>Typed and validated application configuration settings. Allows backup configuration such as parent / child settings. Based off ConfigurationManager.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
+  </ItemGroup>
+
+</Project>
