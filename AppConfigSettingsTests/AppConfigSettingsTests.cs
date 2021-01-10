@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Specialized;
 using System.Configuration;
-using AppConfigSettings;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -28,23 +27,25 @@ namespace AppConfigSettingsTests
         };
 
         [TestInitialize]
-        public void Settings_InitTest() => ConfigSetting<Settings>.SetAppSettings(appConfig);
+        public void Settings_InitTest() => Settings.SetAppSettings(appConfig);
 
         [TestCleanup]
-        public void Settings_CleanTest() => ConfigSetting<Settings>.SetAppSettings(ConfigurationManager.AppSettings);
+        public void Settings_CleanTest() => Settings.SetAppSettings(ConfigurationManager.AppSettings);
 
         [TestMethod]
-        public void AppConfig_Settings_Get()
+        public void Get()
         {
             Settings.Author.Get().Should().Be("Tom");
             Settings.Created.Get().Should().Be(DateTime.Parse(GoodDate));
             Settings.DefaultStatus.Get().Should().Be(StatusEnum.Unknown);
             Settings.Path.Get().Should().Be(@"C:\windows");
             Settings.Retries.Get().Should().Be(3);
+            Settings.HomePath.Get().Should().Be(Environment.GetEnvironmentVariable("HomePath"));
+            Settings2.Public.Get().Should().Be(Environment.GetEnvironmentVariable("Public"));
         }
 
         [TestMethod]
-        public void AppConfig_Settings_TryGet_Good()
+        public void TryGet_Good()
         {
             Settings.Author.TryGet(out var a1).Should().BeTrue();
             a1.Should().Be("Tom");
@@ -59,9 +60,9 @@ namespace AppConfigSettingsTests
         }
 
         [TestMethod]
-        public void AppConfig_Settings_TryGet_Bad()
+        public void TryGet_Bad()
         {
-            ConfigSetting<Settings>.SetAppSettings(appConfigBad);
+            Settings.SetAppSettings(appConfigBad);
             Settings.Author.TryGet(out var a1).Should().BeFalse();
             a1.Should().Be(Settings.Author.DefaultValue);
             Settings.Created.TryGet(out var a2).Should().BeFalse();
@@ -75,7 +76,7 @@ namespace AppConfigSettingsTests
         }
 
         [TestMethod]
-        public void AppConfig_Settings_Convert_BadConversion()
+        public void Convert_BadConversion()
         {
             Settings.Created.Convert(BadVal).Should().Be(Settings.Created.DefaultValue);
             Settings.DefaultStatus.Convert(BadVal).Should().Be(Settings.DefaultStatus.DefaultValue);
@@ -83,7 +84,7 @@ namespace AppConfigSettingsTests
         }
 
         [TestMethod]
-        public void AppConfig_Settings_Convert_GoodConversion()
+        public void Convert_GoodConversion()
         {
             Settings.Created.Convert(GoodDate).Should().Be(DateTime.Parse(GoodDate));
             Settings.DefaultStatus.Convert(StatusEnum.Unknown.ToString()).Should().Be(StatusEnum.Unknown);
@@ -91,7 +92,7 @@ namespace AppConfigSettingsTests
         }
 
         [TestMethod]
-        public void AppConfig_Settings_TryConvert_Bad()
+        public void TryConvert_Bad()
         {
             Settings.Created.TryConvert(BadVal, out var a1).Should().BeFalse();
             a1.Should().Be(Settings.Created.DefaultValue);
@@ -102,7 +103,7 @@ namespace AppConfigSettingsTests
         }
 
         [TestMethod]
-        public void AppConfig_Settings_TryConvert_Good()
+        public void TryConvert_Good()
         {
             Settings.Created.TryConvert(GoodDate, out var a1).Should().BeTrue();
             a1.Should().Be(DateTime.Parse(GoodDate));

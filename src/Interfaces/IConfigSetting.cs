@@ -1,4 +1,5 @@
-﻿using System.Collections.Specialized;
+﻿using System.Collections.Generic;
+using System.Collections.Specialized;
 using Microsoft.Extensions.Configuration;
 
 namespace AppConfigSettings.Interfaces
@@ -15,6 +16,10 @@ namespace AppConfigSettings.Interfaces
         /// </summary>
         /// <value>The configuration.</value>
         IConfigurationRoot Configuration { get; }
+
+        List<string> JsonFiles { get; set; }
+
+        bool IncludeEnvironment { get; set; }
 
         /// <summary>
         /// Gets the key.

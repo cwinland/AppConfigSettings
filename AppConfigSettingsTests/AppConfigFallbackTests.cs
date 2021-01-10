@@ -1,6 +1,5 @@
 using System.Collections.Specialized;
 using System.Configuration;
-using AppConfigSettings;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -25,24 +24,24 @@ namespace AppConfigSettingsTests
         };
 
         [TestInitialize]
-        public void Settings_InitTest()
+        public void InitTest()
         {
-            ConfigSetting<Settings>.SetAppSettings(appConfig1Bad);
-            ConfigSetting<Settings2>.SetAppSettings(appConfig2);
+            Settings.SetAppSettings(appConfig1Bad);
+            Settings2.SetAppSettings(appConfig2);
         }
 
         [TestCleanup]
-        public void Settings_CleanTest() => ConfigSetting<Settings>.SetAppSettings(ConfigurationManager.AppSettings);
+        public void CleanTest() => Settings.SetAppSettings(ConfigurationManager.AppSettings);
 
         [TestMethod]
-        public void AppConfig_Settings_GetSettings()
+        public void GetSettings()
         {
             Settings.Path.Get(false).Should().Be(Settings.Path.DefaultValue);
             Settings.Retries.Get(false).Should().Be(Settings.Retries.DefaultValue);
         }
 
         [TestMethod]
-        public void AppConfig_Settings_GetSettings2()
+        public void GetSettings2()
         {
             Settings2.Sections.Get().Should().Be(4);
             Settings2.TestPath.Get().Should().Be(@"C:\");
@@ -50,23 +49,23 @@ namespace AppConfigSettingsTests
         }
 
         [TestMethod]
-        public void AppConfig_Settings_GetSettingsBackupImplicit()
+        public void GetSettingsBackupImplicit()
         {
             Settings.Path.Get().Should().Be(@"C:\");
             Settings.Retries.Get().Should().Be(22);
         }
 
         [TestMethod]
-        public void AppConfig_Settings_GetSettingsBackupExplicit()
+        public void GetSettingsBackupExplicit()
         {
             Settings.Path.Get(Settings2.TestPath).Should().Be(@"C:\");
             Settings.Retries.Get(Settings2.Retries).Should().Be(22);
         }
 
         [TestMethod]
-        public void AppConfig_Settings_GetSettingsBackup_Fail()
+        public void GetSettingsBackup_Fail()
         {
-            ConfigSetting<Settings2>.SetAppSettings(appConfig2Bad);
+            Settings2.SetAppSettings(appConfig2Bad);
             Settings.Path.Get(Settings2.TestPath).Should().Be(Settings.Path.DefaultValue);
             Settings.Retries.Get(Settings2.Retries).Should().Be(Settings.Retries.DefaultValue);
         }
