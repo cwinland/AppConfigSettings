@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Configuration;
 using System.Linq;
 using System.Reflection;
 using AppConfigSettings.Interfaces;
+using Microsoft.Extensions.Configuration;
 
 namespace AppConfigSettings
 {
@@ -67,6 +69,65 @@ namespace AppConfigSettings
         /// <inheritdoc />
         public NameValueCollection AppConfig { get; set; } = ConfigurationManager.AppSettings;
 
+        public List<string> JsonFiles { get; set; } = new List<string>
+        {
+            "appsettings.json", $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json",
+        };
+
+        public bool IncludeEnvironment { get; set; } = true;
+
+        /// <inheritdoc />
+        public IConfigurationRoot Configuration => InitConfig(JsonFiles,
+                                                              new List<NameValueCollection> { AppConfig, },
+                                                              IncludeEnvironment,
+                                                              false,
+                                                              false);
+
+        private IConfigurationRoot InitConfig(
+            List<string> jsonFiles, List<NameValueCollection> appSettingsCollections,
+            bool includeEnvironmentVariables, bool addDefaultJson, bool addDefaultAppSettings)
+        {
+            var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+            jsonFiles ??= new List<string>();
+
+            appSettingsCollections ??= new List<NameValueCollection>();
+
+            if (addDefaultAppSettings)
+            {
+                appSettingsCollections.Add(ConfigurationManager.AppSettings);
+            }
+
+            if (addDefaultJson)
+            {
+                jsonFiles.Add("appsettings.json");
+                jsonFiles.Add($"appsettings.{env}.json");
+            }
+
+            var inMemoryCollection = appSettingsCollections
+                                     .Select(GetAppSettingsList)
+                                     .ToList();
+
+            var builder = new ConfigurationBuilder();
+
+            inMemoryCollection.ForEach(list => builder.AddInMemoryCollection(list));
+            jsonFiles.ForEach(list => builder.AddJsonFile(list, true, true));
+
+            if (includeEnvironmentVariables)
+            {
+                builder.AddEnvironmentVariables();
+            }
+
+            return builder.Build();
+        }
+
+        private static List<KeyValuePair<string, string>> GetAppSettingsList(NameValueCollection appSettings) =>
+            appSettings.AllKeys.Select(appKey =>
+                                           new KeyValuePair<string, string>(appKey,
+                                                                            appSettings[
+                                                                                appKey]))
+                       .ToList();
+
         /// <inheritdoc />
         public string Key { get; private set; }
 
@@ -127,7 +188,7 @@ namespace AppConfigSettings
         /// <returns><c>true</c> if value exists and is valid, <c>false</c> otherwise.</returns>
         public bool TryGet(out T val)
         {
-            var result = TryConvert(AppConfig[Key], out var newVal) && Validation(newVal);
+            var result = TryConvert(Configuration[Key], out var newVal) && Validation(newVal);
 
             val = result
                 ? newVal
@@ -190,5 +251,18 @@ namespace AppConfigSettings
                      ?.SetValue(field, appSettings);
             }
         }
+
+        //private void SetAppSettings(IConfigurationRoot configuration)
+        //{
+        //    foreach (IConfigSetting field in typeof(T)
+        //                                     .GetRuntimeFields()
+        //                                     .Where(x => typeof(IConfigSetting).IsAssignableFrom(x.FieldType))
+        //                                     .Select(fieldInfo => fieldInfo.GetValue(null)))
+        //    {
+        //        field?.GetType()
+        //             .GetRuntimeProperty("Configuration")
+        //             ?.SetValue(field, configuration);
+        //    }
+        //}
     }
 }

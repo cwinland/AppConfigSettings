@@ -12,5 +12,7 @@ namespace AppConfigSettingsTests
             new ConfigSetting<int>("Retries", 55, i => i > 1);
 
         public static readonly ConfigSetting<int> Sections = new ConfigSetting<int>("Sections", 3);
+
+        public static readonly ConfigSetting<string> Public = new ConfigSetting<string>("Public", string.Empty);
     }
 }

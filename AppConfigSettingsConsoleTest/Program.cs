@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Configuration;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 
@@ -26,11 +26,17 @@ namespace AppConfigSettingsConsoleTest
 
         private static IConfigurationRoot InitConfig()
         {
+            var configSettings = ConfigurationManager.AppSettings.AllKeys
+                                                     .Select(appKey => new KeyValuePair<string, string>(
+                                                                 appKey,
+                                                                 ConfigurationManager.AppSettings[appKey]))
+                                                     .ToList();
+
             var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             var builder = new ConfigurationBuilder()
-                          .SetBasePath(Directory.GetCurrentDirectory())
                           .AddJsonFile("appsettings.json", true, true)
                           .AddJsonFile($"appsettings.{env}.json", true, true)
+                          .AddInMemoryCollection(configSettings)
                           .AddEnvironmentVariables();
 
             return builder.Build();

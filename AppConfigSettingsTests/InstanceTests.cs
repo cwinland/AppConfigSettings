@@ -76,5 +76,12 @@ namespace AppConfigSettingsTests
             settings[Settings.Path.Key].Should().Be(Settings2.TestPath.Get());
             settings[Settings.Retries.Key].Should().Be(Settings2.Retries.Get());
         }
+
+        [TestMethod]
+        public void EnvironmentVariables()
+        {
+            Settings2.Public.Get().Should().Be("C:\\Users\\Public");
+            settings2[Settings2.Public.Key].Should().Be("C:\\Users\\Public");
+        }
     }
 }

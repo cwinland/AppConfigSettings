@@ -1,4 +1,5 @@
 ﻿using System.Collections.Specialized;
+using Microsoft.Extensions.Configuration;
 
 namespace AppConfigSettings.Interfaces
 {
@@ -8,6 +9,12 @@ namespace AppConfigSettings.Interfaces
         /// Configuration App Settings
         /// </summary>
         NameValueCollection AppConfig { get; set; }
+
+        /// <summary>
+        /// Overall Configurations
+        /// </summary>
+        /// <value>The configuration.</value>
+        IConfigurationRoot Configuration { get; }
 
         /// <summary>
         /// Gets the key.
