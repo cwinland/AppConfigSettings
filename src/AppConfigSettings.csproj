@@ -35,6 +35,7 @@
 <ItemGroup>
   <Compile Include="ConfigSetting.cs" />
   <Compile Include="Interfaces\IConfigSetting.cs" />
+  <Compile Include="Interfaces\IConfigSettingT.cs" />
   <Compile Include="SettingsBase.cs" />
 </ItemGroup>
   <ItemGroup>

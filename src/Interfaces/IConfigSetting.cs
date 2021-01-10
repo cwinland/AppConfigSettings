@@ -17,9 +17,17 @@ namespace AppConfigSettings.Interfaces
         /// <value>The configuration.</value>
         IConfigurationRoot Configuration { get; }
 
-        List<string> JsonFiles { get; set; }
-
+        /// <summary>
+        /// Gets or sets a value indicating whether [include environment].
+        /// </summary>
+        /// <value><c>true</c> if [include environment]; otherwise, <c>false</c>.</value>
         bool IncludeEnvironment { get; set; }
+
+        /// <summary>
+        /// Gets or sets the json files.
+        /// </summary>
+        /// <value>The json files.</value>
+        List<string> JsonFiles { get; set; }
 
         /// <summary>
         /// Gets the key.
