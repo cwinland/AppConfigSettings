@@ -1,4 +1,5 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.Collections.Specialized;
 using System.Configuration;
 using System.IO;
 using FluentAssertions;
@@ -80,7 +81,7 @@ namespace AppConfigSettingsTests
         [TestMethod]
         public void EnvironmentVariables()
         {
-            Settings2.Public.Get().Should().Be("C:\\Users\\Public");
+            Settings2.Public.Get().Should().Be(Environment.GetEnvironmentVariable("Public"));
             settings2[Settings2.Public.Key].Should().Be(Settings2.Public.Get());
         }
     }
