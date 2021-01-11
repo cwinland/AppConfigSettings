@@ -1,5 +1,6 @@
 ﻿using System.Collections.Specialized;
 using System.Configuration;
+using System.IO;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -13,7 +14,7 @@ namespace AppConfigSettingsTests
 
         private readonly NameValueCollection appConfig2 = new NameValueCollection
         {
-            { Settings2.TestPath.Key, @"C:\windows" },
+            { Settings2.TestPath.Key, Directory.GetCurrentDirectory() },
             { Settings2.Retries.Key, "22" },
             { Settings2.Sections.Key, "4" },
         };

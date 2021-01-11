@@ -1,5 +1,6 @@
 using System.Collections.Specialized;
 using System.Configuration;
+using System.IO;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -10,7 +11,9 @@ namespace AppConfigSettingsTests
     {
         private readonly NameValueCollection appConfig2 = new NameValueCollection
         {
-            { Settings2.TestPath.Key, @"C:\" }, { Settings2.Retries.Key, "22" }, { Settings2.Sections.Key, "4" },
+            { Settings2.TestPath.Key, Directory.GetCurrentDirectory() },
+            { Settings2.Retries.Key, "22" },
+            { Settings2.Sections.Key, "4" },
         };
 
         private readonly NameValueCollection appConfig1Bad = new NameValueCollection
@@ -44,21 +47,21 @@ namespace AppConfigSettingsTests
         public void GetSettings2()
         {
             Settings2.Sections.Get().Should().Be(4);
-            Settings2.TestPath.Get().Should().Be(@"C:\");
+            Settings2.TestPath.Get().Should().Be(Directory.GetCurrentDirectory());
             Settings2.Retries.Get().Should().Be(22);
         }
 
         [TestMethod]
         public void GetSettingsBackupImplicit()
         {
-            Settings.Path.Get().Should().Be(@"C:\");
+            Settings.Path.Get().Should().Be(Directory.GetCurrentDirectory());
             Settings.Retries.Get().Should().Be(22);
         }
 
         [TestMethod]
         public void GetSettingsBackupExplicit()
         {
-            Settings.Path.Get(Settings2.TestPath).Should().Be(@"C:\");
+            Settings.Path.Get(Settings2.TestPath).Should().Be(Directory.GetCurrentDirectory());
             Settings.Retries.Get(Settings2.Retries).Should().Be(22);
         }
 

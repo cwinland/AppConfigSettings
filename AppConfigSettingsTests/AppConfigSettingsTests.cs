@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Specialized;
 using System.Configuration;
+using System.IO;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -14,7 +15,7 @@ namespace AppConfigSettingsTests
             { Settings.Author.Key, "Tom" },
             { Settings.Created.Key, GoodDate },
             { Settings.DefaultStatus.Key, StatusEnum.Unknown.ToString() },
-            { Settings.Path.Key, @"C:\windows" },
+            { Settings.Path.Key, Directory.GetCurrentDirectory() },
             { Settings.Retries.Key, "3" },
         };
 
@@ -38,7 +39,7 @@ namespace AppConfigSettingsTests
             Settings.Author.Get().Should().Be("Tom");
             Settings.Created.Get().Should().Be(DateTime.Parse(GoodDate));
             Settings.DefaultStatus.Get().Should().Be(StatusEnum.Unknown);
-            Settings.Path.Get().Should().Be(@"C:\windows");
+            Settings.Path.Get().Should().Be(Directory.GetCurrentDirectory());
             Settings.Retries.Get().Should().Be(3);
             Settings.HomePath.Get().Should().Be(Environment.GetEnvironmentVariable("HomePath"));
             Settings2.Public.Get().Should().Be(Environment.GetEnvironmentVariable("Public"));
@@ -54,7 +55,7 @@ namespace AppConfigSettingsTests
             Settings.DefaultStatus.TryGet(out var a3).Should().BeTrue();
             a3.Should().Be(StatusEnum.Unknown);
             Settings.Path.TryGet(out var a4).Should().BeTrue();
-            a4.Should().Be(@"C:\windows");
+            a4.Should().Be(Directory.GetCurrentDirectory());
             Settings.Retries.TryGet(out var a5).Should().BeTrue();
             a5.Should().Be(3);
         }

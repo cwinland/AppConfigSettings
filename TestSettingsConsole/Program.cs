@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using AppConfigSettings;
 
 namespace TestSettingsConsole
 {
@@ -8,6 +9,10 @@ namespace TestSettingsConsole
         private static void Main(string[] args)
         {
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "");
+
+            var LogLevel = Settings.LogLevel.Get(false);
+            var Path = Settings.DefaultRunbookFolder.Get(Settings.SystemRoot);
+            var maxRetries = Settings.MaxRetries.Get(new ConfigSetting<int>("OtherRetry", 2));
 
             Console.WriteLine($"Current Dir: {Directory.GetCurrentDirectory()}");
 
