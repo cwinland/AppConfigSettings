@@ -22,5 +22,11 @@ namespace AppConfigSettingsTests
 
         public static readonly ConfigSetting<string> HomePath =
             new ConfigSetting<string>("HomePath", string.Empty, Path);
+
+        public static readonly ConfigSetting<string> LogLevelDefault =
+            new ConfigSetting<string>("Logging:LogLevel:Default", "DefaultDefault");
+
+        public static readonly ConfigSetting<string> LogLevelLife =
+            new ConfigSetting<string>("Logging:LogLevel:Microsoft.Hosting.Lifetime", "LifeDefault");
     }
 }

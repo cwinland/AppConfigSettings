@@ -9,6 +9,10 @@ namespace AppConfigSettings
 {
     public abstract class SettingsBase<T> : Dictionary<string, object> where T : class, new()
     {
+        private const string CONFIG_SETTING_KEY = "Key";
+        private const string CONFIG_SETTING_VALUE = "Get";
+        private const string CONFIG_SETTING_CONFIG = "AppConfig";
+
         protected SettingsBase() => ConfigSettings.ForEach(field =>
                                                            {
                                                                var fieldType = field?.GetType();
@@ -19,7 +23,7 @@ namespace AppConfigSettings
                                                                }
 
                                                                var key = fieldType
-                                                                         .GetRuntimeProperty("Key")
+                                                                         .GetRuntimeProperty(CONFIG_SETTING_KEY)
                                                                          ?.GetValue(field)
                                                                          ?.ToString();
 
@@ -29,7 +33,8 @@ namespace AppConfigSettings
                                                                }
 
                                                                var getMethod = fieldType
-                                                                   .GetRuntimeMethod("Get", new[] { typeof(bool), });
+                                                                   .GetRuntimeMethod(CONFIG_SETTING_VALUE,
+                                                                       new[] { typeof(bool), });
 
                                                                object[] paramArray = { true, };
                                                                var val = getMethod?.Invoke(field, paramArray);
@@ -53,7 +58,7 @@ namespace AppConfigSettings
         /// <remarks>Default AppSettings is <see cref="ConfigurationManager.AppSettings"/></remarks>
         public static void SetAppSettings(NameValueCollection appSettings) => ConfigSettings.ForEach(
             field => field.GetType()
-                          .GetRuntimeProperty("AppConfig")
+                          .GetRuntimeProperty(CONFIG_SETTING_CONFIG)
                           ?.SetValue(field, appSettings));
     }
 }
