@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Specialized;
 using System.Configuration;
-using AppConfigSettings;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -11,10 +10,10 @@ namespace AppConfigSettingsTests
     public class AppConfigDefaultTests : TestBase
     {
         [TestInitialize]
-        public void Settings_InitTest() => ConfigSetting<Settings>.SetAppSettings(new NameValueCollection());
+        public void Settings_InitTest() => Settings.SetAppSettings(new NameValueCollection());
 
         [TestCleanup]
-        public void Settings_CleanTest() => ConfigSetting<Settings>.SetAppSettings(ConfigurationManager.AppSettings);
+        public void Settings_CleanTest() => Settings.SetAppSettings(ConfigurationManager.AppSettings);
 
         [TestMethod]
         public void AppConfig_Defaults()

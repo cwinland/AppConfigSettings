@@ -7,58 +7,58 @@ using AppConfigSettings.Interfaces;
 
 namespace AppConfigSettings
 {
-    public abstract class SettingsBase<T> : Dictionary<string, object> where T : new()
+    public abstract class SettingsBase<T> : Dictionary<string, object> where T : class, new()
     {
-        protected SettingsBase()
-        {
-            foreach (IConfigSetting field in typeof(T)
-                                             .GetRuntimeFields()
-                                             .Where(x => typeof(IConfigSetting).IsAssignableFrom(x.FieldType))
-                                             .Select(fieldInfo => fieldInfo.GetValue(null)))
-            {
-                var fieldType = field?.GetType();
+        private const string CONFIG_SETTING_KEY = "Key";
+        private const string CONFIG_SETTING_VALUE = "Get";
+        private const string CONFIG_SETTING_CONFIG = "AppConfig";
 
-                if (fieldType == null)
-                {
-                    continue;
-                }
+        protected SettingsBase() => ConfigSettings.ForEach(field =>
+                                                           {
+                                                               var fieldType = field?.GetType();
 
-                var key = fieldType
-                          .GetRuntimeProperty("Key")
-                          ?.GetValue(field)
-                          ?.ToString();
+                                                               if (fieldType == null)
+                                                               {
+                                                                   return;
+                                                               }
 
-                if (key == null)
-                {
-                    continue;
-                }
+                                                               var key = fieldType
+                                                                         .GetRuntimeProperty(CONFIG_SETTING_KEY)
+                                                                         ?.GetValue(field)
+                                                                         ?.ToString();
 
-                var getMethod = fieldType
-                    .GetRuntimeMethod("Get", new[] { typeof(bool), });
+                                                               if (key == null)
+                                                               {
+                                                                   return;
+                                                               }
 
-                object[] paramArray = { true, };
-                var val = getMethod?.Invoke(field, paramArray);
+                                                               var getMethod = fieldType
+                                                                   .GetRuntimeMethod(CONFIG_SETTING_VALUE,
+                                                                       new[] { typeof(bool), });
 
-                Add(key, val);
-            }
-        }
+                                                               object[] paramArray = { true, };
+                                                               var val = getMethod?.Invoke(field, paramArray);
+
+                                                               Add(key, val);
+                                                           });
+
+        private static List<object> ConfigSettings => typeof(T)
+                                                      .GetRuntimeFields()
+                                                      .Where(fieldInfo =>
+                                                                 typeof(IConfigSetting).IsAssignableFrom(
+                                                                     fieldInfo.FieldType) &&
+                                                                 fieldInfo.GetValue(null) != null)
+                                                      .Select(fieldInfo => fieldInfo.GetValue(null))
+                                                      .ToList();
 
         /// <summary>
         /// Sets the application settings to override the default.
         /// </summary>
         /// <param name="appSettings">The application settings.</param>
         /// <remarks>Default AppSettings is <see cref="ConfigurationManager.AppSettings"/></remarks>
-        public void SetAppSettings(NameValueCollection appSettings)
-        {
-            foreach (IConfigSetting field in typeof(T)
-                                             .GetRuntimeFields()
-                                             .Where(x => typeof(IConfigSetting).IsAssignableFrom(x.FieldType))
-                                             .Select(fieldInfo => fieldInfo.GetValue(null)))
-            {
-                field?.GetType()
-                     .GetRuntimeProperty("AppConfig")
-                     ?.SetValue(field, appSettings);
-            }
-        }
+        public static void SetAppSettings(NameValueCollection appSettings) => ConfigSettings.ForEach(
+            field => field.GetType()
+                          .GetRuntimeProperty(CONFIG_SETTING_CONFIG)
+                          ?.SetValue(field, appSettings));
     }
 }

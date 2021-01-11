@@ -1,4 +1,6 @@
-﻿using System.Collections.Specialized;
+﻿using System.Collections.Generic;
+using System.Collections.Specialized;
+using Microsoft.Extensions.Configuration;
 
 namespace AppConfigSettings.Interfaces
 {
@@ -8,6 +10,30 @@ namespace AppConfigSettings.Interfaces
         /// Configuration App Settings
         /// </summary>
         NameValueCollection AppConfig { get; set; }
+
+        /// <summary>
+        /// Overall Configurations
+        /// </summary>
+        /// <value>The configuration.</value>
+        IConfigurationRoot Configuration { get; }
+
+        /// <summary>
+        /// Gets or sets the default directory containing the configuration files.
+        /// </summary>
+        /// <value>The default directory.</value>
+        string DefaultDirectory { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether [include environment].
+        /// </summary>
+        /// <value><c>true</c> if [include environment]; otherwise, <c>false</c>.</value>
+        bool IncludeEnvironment { get; set; }
+
+        /// <summary>
+        /// Gets or sets the json files.
+        /// </summary>
+        /// <value>The json files.</value>
+        List<string> JsonFiles { get; set; }
 
         /// <summary>
         /// Gets the key.

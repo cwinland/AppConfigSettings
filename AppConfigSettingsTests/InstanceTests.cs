@@ -1,6 +1,7 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.Collections.Specialized;
 using System.Configuration;
-using AppConfigSettings;
+using System.IO;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -14,7 +15,7 @@ namespace AppConfigSettingsTests
 
         private readonly NameValueCollection appConfig2 = new NameValueCollection
         {
-            { Settings2.TestPath.Key, @"C:\windows" },
+            { Settings2.TestPath.Key, Directory.GetCurrentDirectory() },
             { Settings2.Retries.Key, "22" },
             { Settings2.Sections.Key, "4" },
         };
@@ -36,15 +37,15 @@ namespace AppConfigSettingsTests
         [TestInitialize]
         public void Settings_InitTest()
         {
-            ConfigSetting<Settings>.SetAppSettings(appConfig1);
-            ConfigSetting<Settings2>.SetAppSettings(appConfig2);
+            Settings.SetAppSettings(appConfig1);
+            Settings2.SetAppSettings(appConfig2);
 
             settings = new Settings();
             settings2 = new Settings2();
         }
 
         [TestCleanup]
-        public void Settings_CleanTest() => ConfigSetting<Settings>.SetAppSettings(ConfigurationManager.AppSettings);
+        public void Settings_CleanTest() => Settings.SetAppSettings(ConfigurationManager.AppSettings);
 
         [TestMethod]
         public void InstanceTests_Type()
@@ -75,6 +76,13 @@ namespace AppConfigSettingsTests
 
             settings[Settings.Path.Key].Should().Be(Settings2.TestPath.Get());
             settings[Settings.Retries.Key].Should().Be(Settings2.Retries.Get());
+        }
+
+        [TestMethod]
+        public void EnvironmentVariables()
+        {
+            Settings2.Public.Get().Should().Be(Environment.GetEnvironmentVariable("Public") ?? string.Empty);
+            settings2[Settings2.Public.Key].Should().Be(Settings2.Public.Get());
         }
     }
 }

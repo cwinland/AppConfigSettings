@@ -1,15 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Configuration;
+using System.IO;
 using System.Linq;
-using System.Reflection;
 using AppConfigSettings.Interfaces;
+using Microsoft.Extensions.Configuration;
 
 namespace AppConfigSettings
 {
-    public class ConfigSetting<T> : IConfigSetting
+    public class ConfigSetting<T> : IConfigSetting<T>
     {
+        private const string APP_SETTINGS_NAME = "appsettings";
+        private const string APP_SETTINGS_EXT = "json";
+        private const string ASP_ENVIRONMENT = "ASPNETCORE_ENVIRONMENT";
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigSetting{T}"/> class.
         /// </summary>
@@ -23,6 +29,12 @@ namespace AppConfigSettings
             ThrowOnException = false;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConfigSetting{T}"/> class.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="defaultValue">The default value.</param>
+        /// <param name="fallbackSetting">The fallback setting.</param>
         public ConfigSetting(string key, T defaultValue, ConfigSetting<T> fallbackSetting) : this(key, defaultValue) =>
             BackupConfigSetting = fallbackSetting;
 
@@ -37,10 +49,19 @@ namespace AppConfigSettings
             string key, T defaultValue, Func<T, bool> validation, bool throwOnException = false) : this(key,
             defaultValue)
         {
+            validation ??= _ => true;
             Validation = validation;
             ThrowOnException = throwOnException;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConfigSetting{T}"/> class.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="defaultValue">The default value.</param>
+        /// <param name="validation">The validation.</param>
+        /// <param name="throwOnException">if set to <c>true</c> [throw on exception].</param>
+        /// <param name="fallbackConfigSetting">The fallback configuration setting.</param>
         public ConfigSetting(
             string key, T defaultValue, Func<T, bool> validation, bool throwOnException,
             ConfigSetting<T> fallbackConfigSetting) : this(key,
@@ -49,23 +70,57 @@ namespace AppConfigSettings
                                                            throwOnException) =>
             BackupConfigSetting = fallbackConfigSetting;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ConfigSetting{T}"/> class.
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="defaultValue"></param>
-        /// <param name="validation"></param>
-        /// <param name="throwOnException"></param>
-        /// <param name="appConfig"></param>
         public ConfigSetting(
             string key, T defaultValue, Func<T, bool> validation, bool throwOnException,
-            NameValueCollection appConfig) : this(key,
-                                                  defaultValue,
-                                                  validation,
-                                                  throwOnException) => AppConfig = appConfig;
+            ConfigSetting<T> fallbackConfigSetting, List<string> jsonFiles, bool includeEnvironment) : this(key,
+            defaultValue,
+            validation,
+            throwOnException,
+            fallbackConfigSetting)
+        {
+            JsonFiles = jsonFiles;
+            IncludeEnvironment = includeEnvironment;
+        }
+
+        public ConfigSetting(
+            string key, T defaultValue, Func<T, bool> validation, bool throwOnException,
+            ConfigSetting<T> fallbackConfigSetting, List<string> jsonFiles, bool includeEnvironment,
+            string defaultDirectory) : this(key,
+                                            defaultValue,
+                                            validation,
+                                            throwOnException,
+                                            fallbackConfigSetting,
+                                            jsonFiles,
+                                            includeEnvironment) => DefaultDirectory = defaultDirectory;
+
+        /// <inheritdoc />
+        public List<string> JsonFiles { get; set; }
+
+        /// <inheritdoc />
+        public bool IncludeEnvironment { get; set; } = true;
+
+        /// <inheritdoc />
+        public string DefaultDirectory { get; set; } = Directory.GetCurrentDirectory();
+
+        /// <inheritdoc />
+        public T DefaultValue { get; private set; }
+
+        /// <inheritdoc />
+        public Func<T, bool> Validation { get; set; }
+
+        /// <inheritdoc />
+        public ConfigSetting<T> BackupConfigSetting { get; set; }
 
         /// <inheritdoc />
         public NameValueCollection AppConfig { get; set; } = ConfigurationManager.AppSettings;
+
+        /// <inheritdoc />
+        public IConfigurationRoot Configuration => InitConfig(JsonFiles,
+                                                              new List<NameValueCollection> { AppConfig, },
+                                                              IncludeEnvironment,
+                                                              JsonFiles == null || JsonFiles.Count == 0,
+                                                              false,
+                                                              DefaultDirectory);
 
         /// <inheritdoc />
         public string Key { get; private set; }
@@ -73,26 +128,10 @@ namespace AppConfigSettings
         /// <inheritdoc />
         public bool ThrowOnException { get; set; }
 
-        /// <summary>
-        /// Gets or sets the default value.
-        /// </summary>
-        /// <value>The default value.</value>
-        public T DefaultValue { get; private set; }
-
-        /// <summary>
-        /// Gets or sets the optional validation routine for this setting.
-        /// </summary>
-        /// <value>The validation.</value>
-        public Func<T, bool> Validation { get; set; }
-
-        public ConfigSetting<T> BackupConfigSetting { get; set; }
-
+        /// <inheritdoc />
         public T Get(bool useBackupSetting = true) => Get(useBackupSetting ? BackupConfigSetting : null);
 
-        /// <summary>
-        /// Gets the setting value.
-        /// </summary>
-        /// <returns>T.</returns>
+        /// <inheritdoc />
         public T Get(ConfigSetting<T> backupConfigSetting)
         {
             T setting;
@@ -120,14 +159,10 @@ namespace AppConfigSettings
             return setting;
         }
 
-        /// <summary>
-        /// Tries to get the value for the specified settings key.
-        /// </summary>
-        /// <param name="val">The value.</param>
-        /// <returns><c>true</c> if value exists and is valid, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool TryGet(out T val)
         {
-            var result = TryConvert(AppConfig[Key], out var newVal) && Validation(newVal);
+            var result = TryConvert(Configuration[Key], out var newVal) && Validation(newVal);
 
             val = result
                 ? newVal
@@ -136,11 +171,7 @@ namespace AppConfigSettings
             return result;
         }
 
-        /// <summary>
-        /// Converts the specified value to specified type or default value.
-        /// </summary>
-        /// <param name="val">The value.</param>
-        /// <returns>T.</returns>
+        /// <inheritdoc />
         public T Convert(string val)
         {
             TryConvert(val, out var result);
@@ -148,12 +179,7 @@ namespace AppConfigSettings
             return result;
         }
 
-        /// <summary>
-        /// Tries to convert the specified value to specified type or default value.
-        /// </summary>
-        /// <param name="val">The value.</param>
-        /// <param name="newVal">The new value.</param>
-        /// <returns><c>true</c> if value exists and is valid, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool TryConvert(string val, out T newVal)
         {
             var valid = !string.IsNullOrWhiteSpace(val);
@@ -173,22 +199,60 @@ namespace AppConfigSettings
             return valid;
         }
 
-        /// <summary>
-        /// Sets the application settings to override the default.
-        /// </summary>
-        /// <param name="appSettings">The application settings.</param>
-        /// <remarks>Default AppSettings is <see cref="ConfigurationManager.AppSettings"/></remarks>
-        public static void SetAppSettings(NameValueCollection appSettings)
+        private static IConfigurationRoot InitConfig(
+            List<string> jsonFiles, List<NameValueCollection> appSettingsCollections,
+            bool includeEnvironmentVariables, bool addDefaultJson, bool addDefaultAppSettings, string currentDirectory)
         {
-            foreach (IConfigSetting field in typeof(T)
-                                             .GetRuntimeFields()
-                                             .Where(x => typeof(IConfigSetting).IsAssignableFrom(x.FieldType))
-                                             .Select(fieldInfo => fieldInfo.GetValue(null)))
+            var env = Environment.GetEnvironmentVariable(ASP_ENVIRONMENT);
+
+            jsonFiles ??= new List<string>();
+            appSettingsCollections ??= new List<NameValueCollection>();
+
+            if (addDefaultAppSettings)
             {
-                field?.GetType()
-                     .GetRuntimeProperty("AppConfig")
-                     ?.SetValue(field, appSettings);
+                appSettingsCollections.Add(ConfigurationManager.AppSettings);
             }
+
+            if (addDefaultJson)
+            {
+                jsonFiles.Add($"{APP_SETTINGS_NAME}.{APP_SETTINGS_EXT}");
+
+                if (!string.IsNullOrWhiteSpace(env))
+                {
+                    jsonFiles.Add($"{APP_SETTINGS_NAME}.{env}.{APP_SETTINGS_EXT}");
+                }
+            }
+
+            var inMemoryCollection = appSettingsCollections
+                                     .Select(GetKeyPairSettings)
+                                     .ToList();
+
+            return BuildConfig(currentDirectory, inMemoryCollection, jsonFiles, includeEnvironmentVariables);
         }
+
+        private static IConfigurationRoot BuildConfig(
+            string currentDirectory, List<List<KeyValuePair<string, string>>> inMemoryCollection,
+            List<string> jsonFiles, bool includeEnvironmentVariables)
+        {
+            var builder = new ConfigurationBuilder();
+            builder.Sources.Clear();
+            builder.SetBasePath(currentDirectory);
+            inMemoryCollection.ForEach(list => builder.AddInMemoryCollection(list));
+            jsonFiles.ForEach(list => builder.AddJsonFile(list, true, true));
+
+            if (includeEnvironmentVariables)
+            {
+                builder.AddEnvironmentVariables();
+            }
+
+            return builder.Build();
+        }
+
+        private static List<KeyValuePair<string, string>> GetKeyPairSettings(NameValueCollection appSettings) =>
+            appSettings.AllKeys.Select(appKey =>
+                                           new KeyValuePair<string, string>(appKey,
+                                                                            appSettings[
+                                                                                appKey]))
+                       .ToList();
     }
 }

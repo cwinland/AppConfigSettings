@@ -19,5 +19,14 @@ namespace AppConfigSettingsTests
 
         public static readonly ConfigSetting<DateTime> Created =
             new ConfigSetting<DateTime>("Created", DateTime.Today, t => t > DateTime.Parse("1/1/1998"));
+
+        public static readonly ConfigSetting<string> HomePath =
+            new ConfigSetting<string>("HomePath", string.Empty, Path);
+
+        public static readonly ConfigSetting<string> LogLevelDefault =
+            new ConfigSetting<string>("Logging:LogLevel:Default", "DefaultDefault");
+
+        public static readonly ConfigSetting<string> LogLevelLife =
+            new ConfigSetting<string>("Logging:LogLevel:Microsoft.Hosting.Lifetime", "LifeDefault");
     }
 }
