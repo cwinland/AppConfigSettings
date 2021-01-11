@@ -41,8 +41,8 @@ namespace AppConfigSettingsTests
             Settings.DefaultStatus.Get().Should().Be(StatusEnum.Unknown);
             Settings.Path.Get().Should().Be(Directory.GetCurrentDirectory());
             Settings.Retries.Get().Should().Be(3);
-            Settings.HomePath.Get(false).Should().Be(Environment.GetEnvironmentVariable("HomePath"));
-            Settings2.Public.Get(false).Should().Be(Environment.GetEnvironmentVariable("Public"));
+            Settings.HomePath.Get(false).Should().Be(Environment.GetEnvironmentVariable("HomePath") ?? string.Empty);
+            Settings2.Public.Get(false).Should().Be(Environment.GetEnvironmentVariable("Public") ?? string.Empty);
         }
 
         [TestMethod]

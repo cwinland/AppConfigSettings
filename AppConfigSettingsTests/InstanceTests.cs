@@ -81,7 +81,7 @@ namespace AppConfigSettingsTests
         [TestMethod]
         public void EnvironmentVariables()
         {
-            Settings2.Public.Get().Should().Be(Environment.GetEnvironmentVariable("Public"));
+            Settings2.Public.Get().Should().Be(Environment.GetEnvironmentVariable("Public") ?? string.Empty);
             settings2[Settings2.Public.Key].Should().Be(Settings2.Public.Get());
         }
     }
