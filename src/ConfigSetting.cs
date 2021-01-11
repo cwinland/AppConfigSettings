@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using AppConfigSettings.Interfaces;
 using Microsoft.Extensions.Configuration;
@@ -48,6 +49,7 @@ namespace AppConfigSettings
             string key, T defaultValue, Func<T, bool> validation, bool throwOnException = false) : this(key,
             defaultValue)
         {
+            validation ??= _ => true;
             Validation = validation;
             ThrowOnException = throwOnException;
         }
@@ -68,15 +70,37 @@ namespace AppConfigSettings
                                                            throwOnException) =>
             BackupConfigSetting = fallbackConfigSetting;
 
-        /// <inheritdoc />
-        public List<string> JsonFiles { get; set; } = new List<string>
+        public ConfigSetting(
+            string key, T defaultValue, Func<T, bool> validation, bool throwOnException,
+            ConfigSetting<T> fallbackConfigSetting, List<string> jsonFiles, bool includeEnvironment) : this(key,
+            defaultValue,
+            validation,
+            throwOnException,
+            fallbackConfigSetting)
         {
-            $"{APP_SETTINGS_NAME}.{APP_SETTINGS_EXT}",
-            $"{APP_SETTINGS_NAME}.{Environment.GetEnvironmentVariable(ASP_ENVIRONMENT)}.{APP_SETTINGS_EXT}",
-        };
+            JsonFiles = jsonFiles;
+            IncludeEnvironment = includeEnvironment;
+        }
+
+        public ConfigSetting(
+            string key, T defaultValue, Func<T, bool> validation, bool throwOnException,
+            ConfigSetting<T> fallbackConfigSetting, List<string> jsonFiles, bool includeEnvironment,
+            string defaultDirectory) : this(key,
+                                            defaultValue,
+                                            validation,
+                                            throwOnException,
+                                            fallbackConfigSetting,
+                                            jsonFiles,
+                                            includeEnvironment) => DefaultDirectory = defaultDirectory;
+
+        /// <inheritdoc />
+        public List<string> JsonFiles { get; set; }
 
         /// <inheritdoc />
         public bool IncludeEnvironment { get; set; } = true;
+
+        /// <inheritdoc />
+        public string DefaultDirectory { get; set; } = Directory.GetCurrentDirectory();
 
         /// <inheritdoc />
         public T DefaultValue { get; private set; }
@@ -94,8 +118,9 @@ namespace AppConfigSettings
         public IConfigurationRoot Configuration => InitConfig(JsonFiles,
                                                               new List<NameValueCollection> { AppConfig, },
                                                               IncludeEnvironment,
+                                                              JsonFiles == null || JsonFiles.Count == 0,
                                                               false,
-                                                              false);
+                                                              DefaultDirectory);
 
         /// <inheritdoc />
         public string Key { get; private set; }
@@ -176,7 +201,7 @@ namespace AppConfigSettings
 
         private static IConfigurationRoot InitConfig(
             List<string> jsonFiles, List<NameValueCollection> appSettingsCollections,
-            bool includeEnvironmentVariables, bool addDefaultJson, bool addDefaultAppSettings)
+            bool includeEnvironmentVariables, bool addDefaultJson, bool addDefaultAppSettings, string currentDirectory)
         {
             var env = Environment.GetEnvironmentVariable(ASP_ENVIRONMENT);
 
@@ -191,15 +216,27 @@ namespace AppConfigSettings
             if (addDefaultJson)
             {
                 jsonFiles.Add($"{APP_SETTINGS_NAME}.{APP_SETTINGS_EXT}");
-                jsonFiles.Add($"{APP_SETTINGS_NAME}.{env}.{APP_SETTINGS_EXT}");
+
+                if (!string.IsNullOrWhiteSpace(env))
+                {
+                    jsonFiles.Add($"{APP_SETTINGS_NAME}.{env}.{APP_SETTINGS_EXT}");
+                }
             }
 
             var inMemoryCollection = appSettingsCollections
                                      .Select(GetKeyPairSettings)
                                      .ToList();
 
-            var builder = new ConfigurationBuilder();
+            return BuildConfig(currentDirectory, inMemoryCollection, jsonFiles, includeEnvironmentVariables);
+        }
 
+        private static IConfigurationRoot BuildConfig(
+            string currentDirectory, List<List<KeyValuePair<string, string>>> inMemoryCollection,
+            List<string> jsonFiles, bool includeEnvironmentVariables)
+        {
+            var builder = new ConfigurationBuilder();
+            builder.Sources.Clear();
+            builder.SetBasePath(currentDirectory);
             inMemoryCollection.ForEach(list => builder.AddInMemoryCollection(list));
             jsonFiles.ForEach(list => builder.AddJsonFile(list, true, true));
 

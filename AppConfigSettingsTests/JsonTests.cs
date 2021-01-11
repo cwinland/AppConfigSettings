@@ -9,13 +9,13 @@ namespace AppConfigSettingsTests
     [TestClass]
     public class JsonTests : TestBase
     {
-        private readonly string jsonConfig =
+        private const string JSON_CONFIG =
             "{\r\n  \"Logging\": {\r\n    \"LogLevel\": {\r\n      \"Default\": \"Information\",\r\n      \"Microsoft\": \"Warning\",\r\n      \"Microsoft.Hosting.Lifetime\": \"Warning\"\r\n    }\r\n  },\r\n  \"AllowedHosts\": \"*\",\r\n  \"MyCustomKey\": \"MyCustomKey Value coming from appsettings.json\"\r\n}";
 
-        private readonly string jsonConfigDev =
+        private const string JSON_CONFIG_DEV =
             "{\r\n  \"Logging\": {\r\n    \"LogLevel\": {\r\n      \"Default\": \"Verbose\",\r\n      \"Microsoft\": \"Warning\",\r\n      \"Microsoft.Hosting.Lifetime\": \"Warning\"\r\n    }\r\n  },\r\n  \"AllowedHosts\": \"*\",\r\n  \"MyCustomKey\": \"MyCustomKey Value coming from appsettings.dev.json\"\r\n}";
 
-        private readonly string jsonConfigTest =
+        private const string JSON_CONFIG_TEST =
             "{\r\n  \"Logging\": {\r\n    \"LogLevel\": {\r\n      \"Default\": \"Warning\",\r\n      \"Microsoft\": \"Warning\",\r\n      \"Microsoft.Hosting.Lifetime\": \"Warning\"\r\n    }\r\n  },\r\n  \"AllowedHosts\": \"*\",\r\n  \"MyCustomKey\": \"MyCustomKey Value coming from appsettings.test.json\"\r\n}";
 
         private readonly List<string> filePaths = new List<string>();
@@ -24,13 +24,13 @@ namespace AppConfigSettingsTests
         public void Settings_InitTest()
         {
             filePaths.Add(CreateFile($"{APP_SETTINGS_NAME}.{APP_SETTINGS_EXT}",
-                                     jsonConfig,
+                                     JSON_CONFIG,
                                      Directory.GetCurrentDirectory()));
             filePaths.Add(CreateFile($"{APP_SETTINGS_NAME}.dev.{APP_SETTINGS_EXT}",
-                                     jsonConfigDev,
+                                     JSON_CONFIG_DEV,
                                      Directory.GetCurrentDirectory()));
             filePaths.Add(CreateFile($"{APP_SETTINGS_NAME}.test.{APP_SETTINGS_EXT}",
-                                     jsonConfigTest,
+                                     JSON_CONFIG_TEST,
                                      Directory.GetCurrentDirectory()));
         }
 

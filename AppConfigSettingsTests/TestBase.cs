@@ -26,6 +26,6 @@ namespace AppConfigSettingsTests
             return fullPath;
         }
 
-        protected void DeleteFile(string path) => File.Delete(path);
+        protected static void DeleteFile(string path) => File.Delete(path);
     }
 }

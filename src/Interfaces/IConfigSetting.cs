@@ -18,6 +18,12 @@ namespace AppConfigSettings.Interfaces
         IConfigurationRoot Configuration { get; }
 
         /// <summary>
+        /// Gets or sets the default directory containing the configuration files.
+        /// </summary>
+        /// <value>The default directory.</value>
+        string DefaultDirectory { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether [include environment].
         /// </summary>
         /// <value><c>true</c> if [include environment]; otherwise, <c>false</c>.</value>
