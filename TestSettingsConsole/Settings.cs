@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using AppConfigSettings;
 using AppConfigSettings.Enum;
@@ -37,7 +36,6 @@ namespace TestSettingsConsole
                                       null,
                                       false,
                                       null,
-                                      new List<string>(),
                                       Environment.CurrentDirectory);
 
         public static readonly ConfigSetting<string> SystemRoot2 =

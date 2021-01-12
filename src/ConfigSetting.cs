@@ -39,7 +39,11 @@ namespace AppConfigSettings
         /// <param name="defaultValue">The default value.</param>
         /// <param name="scope">Determines the scope for this setting.</param>
         /// <param name="fallbackSetting">The fallback setting.</param>
-        public ConfigSetting(string key, T defaultValue, SettingScopes scope, ConfigSetting<T> fallbackSetting) :
+        public ConfigSetting(
+            string key,
+            T defaultValue,
+            SettingScopes scope,
+            ConfigSetting<T> fallbackSetting) :
             this(key, defaultValue, scope) => BackupConfigSetting = fallbackSetting;
 
         /// <summary>
@@ -51,7 +55,9 @@ namespace AppConfigSettings
         /// <param name="validation">Validation for the setting.</param>
         /// <param name="throwOnException"></param>
         public ConfigSetting(
-            string key, T defaultValue, SettingScopes scope, Func<T, bool> validation,
+            string key,
+            T defaultValue, SettingScopes scope,
+            Func<T, bool> validation,
             bool throwOnException = false) : this(key,
                                                   defaultValue,
                                                   scope)
@@ -88,37 +94,16 @@ namespace AppConfigSettings
         /// <param name="validation">The validation.</param>
         /// <param name="throwOnException">if set to <c>true</c> [throw on exception].</param>
         /// <param name="fallbackConfigSetting">The fallback configuration setting.</param>
-        /// <param name="jsonFiles">The json files.</param>
-        public ConfigSetting(
-            string key, T defaultValue, SettingScopes scope, Func<T, bool> validation, bool throwOnException,
-            ConfigSetting<T> fallbackConfigSetting, List<string> jsonFiles) : this(key,
-            defaultValue,
-            scope,
-            validation,
-            throwOnException,
-            fallbackConfigSetting) => JsonFiles = jsonFiles;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ConfigSetting{T}"/> class.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        /// <param name="defaultValue">The default value.</param>
-        /// <param name="scope">Determines the scope for this setting.</param>
-        /// <param name="validation">The validation.</param>
-        /// <param name="throwOnException">if set to <c>true</c> [throw on exception].</param>
-        /// <param name="fallbackConfigSetting">The fallback configuration setting.</param>
-        /// <param name="jsonFiles">The json files.</param>
         /// <param name="defaultDirectory">The default directory.</param>
         public ConfigSetting(
             string key, T defaultValue, SettingScopes scope, Func<T, bool> validation, bool throwOnException,
-            ConfigSetting<T> fallbackConfigSetting, List<string> jsonFiles,
+            ConfigSetting<T> fallbackConfigSetting,
             string defaultDirectory) : this(key,
                                             defaultValue,
                                             scope,
                                             validation,
                                             throwOnException,
-                                            fallbackConfigSetting,
-                                            jsonFiles) => DefaultDirectory = defaultDirectory;
+                                            fallbackConfigSetting) => DefaultDirectory = defaultDirectory;
 
         /// <inheritdoc />
         public List<string> JsonFiles { get; set; }
