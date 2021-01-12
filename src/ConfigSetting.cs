@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using AppConfigSettings.Enum;
 using AppConfigSettings.Interfaces;
 using Microsoft.Extensions.Configuration;
 
@@ -21,12 +22,14 @@ namespace AppConfigSettings
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="defaultValue">The default value.</param>
-        public ConfigSetting(string key, T defaultValue)
+        /// <param name="scope">Determines the scope for this setting.</param>
+        public ConfigSetting(string key, T defaultValue, SettingScopes scope = SettingScopes.Any)
         {
             Key = key;
             DefaultValue = defaultValue;
             Validation = _ => true;
             ThrowOnException = false;
+            Scopes = scope;
         }
 
         /// <summary>
@@ -34,20 +37,24 @@ namespace AppConfigSettings
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="defaultValue">The default value.</param>
+        /// <param name="scope">Determines the scope for this setting.</param>
         /// <param name="fallbackSetting">The fallback setting.</param>
-        public ConfigSetting(string key, T defaultValue, ConfigSetting<T> fallbackSetting) : this(key, defaultValue) =>
-            BackupConfigSetting = fallbackSetting;
+        public ConfigSetting(string key, T defaultValue, SettingScopes scope, ConfigSetting<T> fallbackSetting) :
+            this(key, defaultValue, scope) => BackupConfigSetting = fallbackSetting;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigSetting{T}"/> class.
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="defaultValue">The default value.</param>
+        /// <param name="scope">Determines the scope for this setting.</param>
         /// <param name="validation">Validation for the setting.</param>
         /// <param name="throwOnException"></param>
         public ConfigSetting(
-            string key, T defaultValue, Func<T, bool> validation, bool throwOnException = false) : this(key,
-            defaultValue)
+            string key, T defaultValue, SettingScopes scope, Func<T, bool> validation,
+            bool throwOnException = false) : this(key,
+                                                  defaultValue,
+                                                  scope)
         {
             validation ??= _ => true;
             Validation = validation;
@@ -59,21 +66,35 @@ namespace AppConfigSettings
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="defaultValue">The default value.</param>
+        /// <param name="scope">Determines the scope for this setting.</param>
         /// <param name="validation">The validation.</param>
         /// <param name="throwOnException">if set to <c>true</c> [throw on exception].</param>
         /// <param name="fallbackConfigSetting">The fallback configuration setting.</param>
         public ConfigSetting(
-            string key, T defaultValue, Func<T, bool> validation, bool throwOnException,
+            string key, T defaultValue, SettingScopes scope, Func<T, bool> validation, bool throwOnException,
             ConfigSetting<T> fallbackConfigSetting) : this(key,
                                                            defaultValue,
+                                                           scope,
                                                            validation,
                                                            throwOnException) =>
             BackupConfigSetting = fallbackConfigSetting;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConfigSetting{T}"/> class.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="defaultValue">The default value.</param>
+        /// <param name="scope">Determines the scope for this setting.</param>
+        /// <param name="validation">The validation.</param>
+        /// <param name="throwOnException">if set to <c>true</c> [throw on exception].</param>
+        /// <param name="fallbackConfigSetting">The fallback configuration setting.</param>
+        /// <param name="jsonFiles">The json files.</param>
+        /// <param name="includeEnvironment">if set to <c>true</c> [include environment].</param>
         public ConfigSetting(
-            string key, T defaultValue, Func<T, bool> validation, bool throwOnException,
+            string key, T defaultValue, SettingScopes scope, Func<T, bool> validation, bool throwOnException,
             ConfigSetting<T> fallbackConfigSetting, List<string> jsonFiles, bool includeEnvironment) : this(key,
             defaultValue,
+            scope,
             validation,
             throwOnException,
             fallbackConfigSetting)
@@ -82,11 +103,24 @@ namespace AppConfigSettings
             IncludeEnvironment = includeEnvironment;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConfigSetting{T}"/> class.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="defaultValue">The default value.</param>
+        /// <param name="scope">Determines the scope for this setting.</param>
+        /// <param name="validation">The validation.</param>
+        /// <param name="throwOnException">if set to <c>true</c> [throw on exception].</param>
+        /// <param name="fallbackConfigSetting">The fallback configuration setting.</param>
+        /// <param name="jsonFiles">The json files.</param>
+        /// <param name="includeEnvironment">if set to <c>true</c> [include environment].</param>
+        /// <param name="defaultDirectory">The default directory.</param>
         public ConfigSetting(
-            string key, T defaultValue, Func<T, bool> validation, bool throwOnException,
+            string key, T defaultValue, SettingScopes scope, Func<T, bool> validation, bool throwOnException,
             ConfigSetting<T> fallbackConfigSetting, List<string> jsonFiles, bool includeEnvironment,
             string defaultDirectory) : this(key,
                                             defaultValue,
+                                            scope,
                                             validation,
                                             throwOnException,
                                             fallbackConfigSetting,
@@ -116,9 +150,14 @@ namespace AppConfigSettings
 
         /// <inheritdoc />
         public IConfigurationRoot Configuration => InitConfig(JsonFiles,
-                                                              new List<NameValueCollection> { AppConfig, },
+                                                              HasScope(SettingScopes.AppSettings)
+                                                                  ? new List<NameValueCollection> { AppConfig, }
+                                                                  : new List<NameValueCollection>(),
+                                                              HasScope(SettingScopes.Environment) &&
                                                               IncludeEnvironment,
-                                                              JsonFiles == null || JsonFiles.Count == 0,
+                                                              HasScope(SettingScopes.Json) &&
+                                                              (JsonFiles == null ||
+                                                               JsonFiles.Count == 0),
                                                               false,
                                                               DefaultDirectory);
 
@@ -127,6 +166,8 @@ namespace AppConfigSettings
 
         /// <inheritdoc />
         public bool ThrowOnException { get; set; }
+
+        public SettingScopes Scopes { get; set; }
 
         /// <inheritdoc />
         public T Get(bool useBackupSetting = true) => Get(useBackupSetting ? BackupConfigSetting : null);
@@ -254,5 +295,7 @@ namespace AppConfigSettings
                                                                             appSettings[
                                                                                 appKey]))
                        .ToList();
+
+        private bool HasScope(SettingScopes scope) => Scopes == SettingScopes.Any || Scopes.HasFlag(scope);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Specialized;
+using AppConfigSettings.Enum;
 using Microsoft.Extensions.Configuration;
 
 namespace AppConfigSettings.Interfaces
@@ -40,6 +41,8 @@ namespace AppConfigSettings.Interfaces
         /// </summary>
         /// <value>The key.</value>
         string Key { get; }
+
+        SettingScopes Scopes { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether [throw on exception].
