@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using AppConfigSettings;
 using AppConfigSettings.Enum;
@@ -17,12 +18,12 @@ namespace TestSettingsConsole
             new ConfigSetting<int>("MaxRetries", 2, SettingScopes.Any, i => i > 0);
 
         public static readonly ConfigSetting<LoggingLevels> AppLoggingLevel =
-            new ConfigSetting<LoggingLevels>("AppLoggingLevel", LoggingLevels.None);
+            new ConfigSetting<LoggingLevels>("AppLoggingLevel", LoggingLevels.None, SettingScopes.AppSettings);
 
         public static readonly ConfigSetting<LoggingLevels> LogLevel =
             new ConfigSetting<LoggingLevels>("Logging:LogLevel:Default",
                                              LoggingLevels.Information,
-                                             SettingScopes.Any,
+                                             SettingScopes.Json,
                                              AppLoggingLevel);
 
         public static readonly ConfigSetting<string> AllowedHosts = new ConfigSetting<string>("AllowedHosts", "None");
@@ -37,7 +38,7 @@ namespace TestSettingsConsole
                                       false,
                                       null,
                                       new List<string>(),
-                                      false);
+                                      Environment.CurrentDirectory);
 
         public static readonly ConfigSetting<string> SystemRoot2 =
             new ConfigSetting<string>("SystemRoot", "None", SettingScopes.AppSettings | SettingScopes.Environment);

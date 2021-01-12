@@ -89,19 +89,14 @@ namespace AppConfigSettings
         /// <param name="throwOnException">if set to <c>true</c> [throw on exception].</param>
         /// <param name="fallbackConfigSetting">The fallback configuration setting.</param>
         /// <param name="jsonFiles">The json files.</param>
-        /// <param name="includeEnvironment">if set to <c>true</c> [include environment].</param>
         public ConfigSetting(
             string key, T defaultValue, SettingScopes scope, Func<T, bool> validation, bool throwOnException,
-            ConfigSetting<T> fallbackConfigSetting, List<string> jsonFiles, bool includeEnvironment) : this(key,
+            ConfigSetting<T> fallbackConfigSetting, List<string> jsonFiles) : this(key,
             defaultValue,
             scope,
             validation,
             throwOnException,
-            fallbackConfigSetting)
-        {
-            JsonFiles = jsonFiles;
-            IncludeEnvironment = includeEnvironment;
-        }
+            fallbackConfigSetting) => JsonFiles = jsonFiles;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigSetting{T}"/> class.
@@ -113,25 +108,20 @@ namespace AppConfigSettings
         /// <param name="throwOnException">if set to <c>true</c> [throw on exception].</param>
         /// <param name="fallbackConfigSetting">The fallback configuration setting.</param>
         /// <param name="jsonFiles">The json files.</param>
-        /// <param name="includeEnvironment">if set to <c>true</c> [include environment].</param>
         /// <param name="defaultDirectory">The default directory.</param>
         public ConfigSetting(
             string key, T defaultValue, SettingScopes scope, Func<T, bool> validation, bool throwOnException,
-            ConfigSetting<T> fallbackConfigSetting, List<string> jsonFiles, bool includeEnvironment,
+            ConfigSetting<T> fallbackConfigSetting, List<string> jsonFiles,
             string defaultDirectory) : this(key,
                                             defaultValue,
                                             scope,
                                             validation,
                                             throwOnException,
                                             fallbackConfigSetting,
-                                            jsonFiles,
-                                            includeEnvironment) => DefaultDirectory = defaultDirectory;
+                                            jsonFiles) => DefaultDirectory = defaultDirectory;
 
         /// <inheritdoc />
         public List<string> JsonFiles { get; set; }
-
-        /// <inheritdoc />
-        public bool IncludeEnvironment { get; set; } = true;
 
         /// <inheritdoc />
         public string DefaultDirectory { get; set; } = Directory.GetCurrentDirectory();
@@ -153,8 +143,7 @@ namespace AppConfigSettings
                                                               HasScope(SettingScopes.AppSettings)
                                                                   ? new List<NameValueCollection> { AppConfig, }
                                                                   : new List<NameValueCollection>(),
-                                                              HasScope(SettingScopes.Environment) &&
-                                                              IncludeEnvironment,
+                                                              HasScope(SettingScopes.Environment),
                                                               HasScope(SettingScopes.Json) &&
                                                               (JsonFiles == null ||
                                                                JsonFiles.Count == 0),
@@ -271,6 +260,15 @@ namespace AppConfigSettings
             return BuildConfig(currentDirectory, inMemoryCollection, jsonFiles, includeEnvironmentVariables);
         }
 
+        /// <summary>
+        /// Builds the configuration.
+        /// </summary>
+        /// <param name="currentDirectory">The current directory.</param>
+        /// <param name="inMemoryCollection">The in memory collection.</param>
+        /// <param name="jsonFiles">The json files.</param>
+        /// <param name="includeEnvironmentVariables">if set to <c>true</c> [include environment variables].</param>
+        /// <returns>IConfigurationRoot.</returns>
+        /// <remarks>Order added to the builder matters. Last added is the tie breaker.</remarks>
         private static IConfigurationRoot BuildConfig(
             string currentDirectory, List<List<KeyValuePair<string, string>>> inMemoryCollection,
             List<string> jsonFiles, bool includeEnvironmentVariables)
@@ -278,13 +276,15 @@ namespace AppConfigSettings
             var builder = new ConfigurationBuilder();
             builder.Sources.Clear();
             builder.SetBasePath(currentDirectory);
-            inMemoryCollection.ForEach(list => builder.AddInMemoryCollection(list));
-            jsonFiles.ForEach(list => builder.AddJsonFile(list, true, true));
 
             if (includeEnvironmentVariables)
             {
                 builder.AddEnvironmentVariables();
             }
+
+            inMemoryCollection.ForEach(list => builder.AddInMemoryCollection(list));
+
+            jsonFiles.ForEach(list => builder.AddJsonFile(list, true, true));
 
             return builder.Build();
         }
