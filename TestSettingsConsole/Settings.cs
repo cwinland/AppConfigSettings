@@ -25,7 +25,8 @@ namespace TestSettingsConsole
                                              SettingScopes.Json,
                                              AppLoggingLevel);
 
-        public static readonly ConfigSetting<string> AllowedHosts = new ConfigSetting<string>("AllowedHosts", "None");
+        public static readonly ConfigSetting<string> AllowedHosts =
+            new ConfigSetting<string>("AllowedHosts", "None", SettingScopes.AppSettings | SettingScopes.Json);
 
         public static readonly ConfigSetting<string> TestSetting = new ConfigSetting<string>("TestSetting", "None");
 
@@ -39,6 +40,6 @@ namespace TestSettingsConsole
                                       Environment.CurrentDirectory);
 
         public static readonly ConfigSetting<string> SystemRoot2 =
-            new ConfigSetting<string>("SystemRoot", "None", SettingScopes.AppSettings | SettingScopes.Environment);
+            new ConfigSetting<string>("SystemRoot", "None", SettingScopes.Environment);
     }
 }

@@ -1,22 +1,23 @@
 # AppConfigSettings
 
-Manage Validated and Strongly Typed Application Configuration Settings
+Multiple Source Configuration Reader to manage validated and strongly typed application configuration settings from App.Config, AppSettings.json, and environment variables.
 
 ## Feature Overview
 
 1. Typed Configuration Settings.
 2. Configuration Settings Multiple sources.
-   1. App.Config.
-   2. AppSettings.json.
-   3. AppSettings.Environment.json (environment based).
-   4. Custom json files.
-   5. Environment variables.
+   - App.Config.
+   - AppSettings.json.
+   - AppSettings.Environment.json (environment based).
+   - Custom json files.
+   - Environment variables.
 3. Configuration Settings Validation.
-   1. Type Validation.
-   2. Custom Validation.
-4. Fallback settings (if settings doesn't exist, check "this" setting).
+   - Type Validation.
+   - Custom Validation.
+4. Fallback settings (if settings doesn't exist, check the 'fallback' setting).
 5. Exception Handling (throwing errors on validation issues is optional).
 6. Default Values.
+7. Scope Restrictions - Setting focuses on specific source, if duplicate values are found.
 
 ## Available Method Calls
 
@@ -68,32 +69,52 @@ var maxRetries = Settings.MaxRetries.Get(new ConfigSetting<int>("OtherRetry", 2)
 public class Settings : SettingsBase<Settings>
 {
     public static readonly ConfigSetting<string> DefaultRunbookFolder =
-        new ConfigSetting<string>("DefaultRunbookFolder", Directory.GetCurrentDirectory(), Directory.Exists);
+        new ConfigSetting<string>("DefaultRunbookFolder",
+                                    Directory.GetCurrentDirectory(),
+                                    SettingScopes.Any,
+                                    Directory.Exists);
 
-    public static readonly ConfigSetting<int> MaxRetries = new ConfigSetting<int>("MaxRetries", 2, i => i > 0);
+    public static readonly ConfigSetting<int> MaxRetries =
+        new ConfigSetting<int>("MaxRetries", 2, SettingScopes.Any, i => i > 0);
 
     public static readonly ConfigSetting<LoggingLevels> AppLoggingLevel =
-        new ConfigSetting<LoggingLevels>("AppLoggingLevel", LoggingLevels.None);
+        new ConfigSetting<LoggingLevels>("AppLoggingLevel", LoggingLevels.None, SettingScopes.AppSettings);
 
     public static readonly ConfigSetting<LoggingLevels> LogLevel =
-        new ConfigSetting<LoggingLevels>("Logging:LogLevel:Default", LoggingLevels.Information, AppLoggingLevel);
+        new ConfigSetting<LoggingLevels>("Logging:LogLevel:Default",
+                                            LoggingLevels.Information,
+                                            SettingScopes.Json,
+                                            AppLoggingLevel);
+
+    public static readonly ConfigSetting<string> AllowedHosts =
+        new ConfigSetting<string>("AllowedHosts", "None", SettingScopes.AppSettings | SettingScopes.Json);
+
+    public static readonly ConfigSetting<string> TestSetting = new ConfigSetting<string>("TestSetting", "None");
 
     public static readonly ConfigSetting<string> SystemRoot =
-        new ConfigSetting<string>("SystemRoot", "None", null, false, null, new List<string>(), false);
+        new ConfigSetting<string>("SystemRoot",
+                                    "None",
+                                    SettingScopes.AppSettings,
+                                    null,
+                                    false,
+                                    null,
+                                    Environment.CurrentDirectory);
 
     public static readonly ConfigSetting<string> SystemRoot2 =
-        new ConfigSetting<string>("SystemRoot", "None");
-}
+        new ConfigSetting<string>("SystemRoot", "None", SettingScopes.Environment);
+
 ```
 
-| **Setting** | **Data Type** | **Validation** | **Default** | **Fallback Value** | **Other** |
+| **Setting** | **Data Type** | **Scope** | **Validation** | **Default** | **Fallback Value** |
 | - | - | - | - | - | - |
-| DefaultRunbookFolder | String | Directory existence | Current Directory | None |  |
-| MaxRetries | Integer | MaxRetries > 0 | None | None |  |
-| AppLoggingLevel | LoggingLevel (Enum) | None | None | None |  |
-| LogLevel | LoggingLevel (Enum) | Default type checking to ensure Enum value is valid. No Custom Validation. | Information | AppLoggingLevel |  |
-| SystemRoot | String | None | None | None | No AppSettings JSON / Environment Variables
-| SystemRoot2 | String | None | None | None | Uses Default JSON file(s) / Environment Variables |
+| DefaultRunbookFolder | String | Any | Directory existence | Current Directory | None | |
+| MaxRetries | Integer | Any | MaxRetries > 0 | None | None | |
+| AppLoggingLevel | LoggingLevel (Enum) | AppSettings | None | None | None | |
+| LogLevel | LoggingLevel (Enum) | Json | Default type checking to ensure Enum value is valid. No Custom Validation. | Information | AppLoggingLevel | |
+| AllowedHosts | string | AppSettings, Json | None | None | | |
+| TestSetting | string | Any (Default) | None | None | None | |
+| SystemRoot | String | AppSettings | None | None | None |
+| SystemRoot2 | String | Environment | None | None | None |
 
 ## MIT License
 
