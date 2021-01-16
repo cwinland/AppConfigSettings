@@ -12,18 +12,18 @@ namespace AppConfigSettingsTests
         private readonly NameValueCollection appConfig2 = new NameValueCollection
         {
             { Settings2.TestPath.Key, Directory.GetCurrentDirectory() },
-            { Settings2.Retries.Key, "22" },
+            { Settings2.Retries.Key, GOOD_INT.ToString() },
             { Settings2.Sections.Key, "4" },
         };
 
         private readonly NameValueCollection appConfig1Bad = new NameValueCollection
         {
-            { Settings.Path.Key, BadVal }, { Settings.Retries.Key, "0" },
+            { Settings.Path.Key, BAD_VAL }, { Settings.Retries.Key, "0" },
         };
 
         private readonly NameValueCollection appConfig2Bad = new NameValueCollection
         {
-            { Settings2.TestPath.Key, BadVal }, { Settings2.Retries.Key, "-1" },
+            { Settings2.TestPath.Key, BAD_VAL }, { Settings2.Retries.Key, "-1" },
         };
 
         [TestInitialize]
@@ -48,21 +48,21 @@ namespace AppConfigSettingsTests
         {
             Settings2.Sections.Get().Should().Be(4);
             Settings2.TestPath.Get().Should().Be(Directory.GetCurrentDirectory());
-            Settings2.Retries.Get().Should().Be(22);
+            Settings2.Retries.Get().Should().Be(GOOD_INT);
         }
 
         [TestMethod]
         public void GetSettingsBackupImplicit()
         {
             Settings.Path.Get().Should().Be(Directory.GetCurrentDirectory());
-            Settings.Retries.Get().Should().Be(22);
+            Settings.Retries.Get().Should().Be(GOOD_INT);
         }
 
         [TestMethod]
         public void GetSettingsBackupExplicit()
         {
             Settings.Path.Get(Settings2.TestPath).Should().Be(Directory.GetCurrentDirectory());
-            Settings.Retries.Get(Settings2.Retries).Should().Be(22);
+            Settings.Retries.Get(Settings2.Retries).Should().Be(GOOD_INT);
         }
 
         [TestMethod]

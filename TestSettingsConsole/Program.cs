@@ -10,9 +10,11 @@ namespace TestSettingsConsole
         {
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "");
 
-            var LogLevel = Settings.LogLevel.Get(false);
-            var Path = Settings.DefaultRunbookFolder.Get(Settings.SystemRoot);
+            var logLevel = Settings.LogLevel.Get(false);
+            var path = Settings.DefaultFolder.Get(Settings.SystemRoot);
             var maxRetries = Settings.MaxRetries.Get(new ConfigSetting<int>("OtherRetry", 2));
+            var settings = new Settings();
+            var level = settings[nameof(Settings.LogLevel)].ToString();
 
             Console.WriteLine($"Current Dir: {Directory.GetCurrentDirectory()}");
 
@@ -21,7 +23,7 @@ namespace TestSettingsConsole
 
             Console.WriteLine($"Log Level: {Settings.LogLevel.Get()}");
             Console.WriteLine($"App Log Level: {Settings.AppLoggingLevel.Get()}");
-            Console.WriteLine($"DefaultRunbookFolder: {Settings.DefaultRunbookFolder.Get()}");
+            Console.WriteLine($"DefaultFolder: {Settings.DefaultFolder.Get()}");
             Console.WriteLine($"MaxRetries: {Settings.MaxRetries.Get()}");
             Console.WriteLine($"AllowedHosts: {Settings.AllowedHosts.Get()}");
             Console.WriteLine($"TestSetting: {Settings.TestSetting.Get()}");
@@ -35,7 +37,7 @@ namespace TestSettingsConsole
 
             Console.WriteLine($"Log Level: {Settings.LogLevel.Get()}");
             Console.WriteLine($"App Log Level: {Settings.AppLoggingLevel.Get()}");
-            Console.WriteLine($"DefaultRunbookFolder: {Settings.DefaultRunbookFolder.Get()}");
+            Console.WriteLine($"DefaultFolder: {Settings.DefaultFolder.Get()}");
             Console.WriteLine($"MaxRetries: {Settings.MaxRetries.Get()}");
             Console.WriteLine($"AllowedHosts: {Settings.AllowedHosts.Get()}");
             Console.WriteLine($"TestSetting: {Settings.TestSetting.Get()}");

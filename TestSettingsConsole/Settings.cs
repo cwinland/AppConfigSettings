@@ -7,8 +7,8 @@ namespace TestSettingsConsole
 {
     public class Settings : SettingsBase<Settings>
     {
-        public static readonly ConfigSetting<string> DefaultRunbookFolder =
-            new ConfigSetting<string>("DefaultRunbookFolder",
+        public static readonly ConfigSetting<string> DefaultFolder =
+            new ConfigSetting<string>("DefaultFolder",
                                       Directory.GetCurrentDirectory(),
                                       SettingScopes.Any,
                                       Directory.Exists);

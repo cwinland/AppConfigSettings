@@ -63,8 +63,8 @@ namespace AppConfigSettingsTests
             Settings.LogLevelLife.Get().Should().Be(expectedLife);
             Settings.LogLevelDefault.Get().Should().Be(expectedDefault);
             var settings = new Settings();
-            settings[Settings.LogLevelDefault.Key].Should().Be(expectedDefault);
-            settings[Settings.LogLevelLife.Key].Should().Be(expectedLife);
+            settings[nameof(Settings.LogLevelDefault)].Should().Be(expectedDefault);
+            settings[nameof(Settings.LogLevelLife)].Should().Be(expectedLife);
         }
 
         [TestMethod]

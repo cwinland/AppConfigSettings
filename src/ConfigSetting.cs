@@ -17,13 +17,39 @@ namespace AppConfigSettings
         private const string APP_SETTINGS_EXT = "json";
         private const string ASP_ENVIRONMENT = "ASPNETCORE_ENVIRONMENT";
 
+        /// <inheritdoc />
+        public NameValueCollection AppConfig { get; set; } = ConfigurationManager.AppSettings;
+
+        /// <inheritdoc />
+        public ConfigSetting<T> BackupConfigSetting { get; set; }
+
+        /// <inheritdoc />
+        public string DefaultDirectory { get; set; } = Directory.GetCurrentDirectory();
+
+        /// <inheritdoc />
+        public T DefaultValue { get; private set; }
+
+        /// <inheritdoc />
+        public List<string> JsonFiles { get; set; }
+
+        /// <inheritdoc />
+        public string Key { get; private set; }
+
+        public SettingScopes Scopes { get; set; }
+
+        /// <inheritdoc />
+        public bool ThrowOnException { get; set; }
+
+        /// <inheritdoc />
+        public Func<T, bool> Validation { get; set; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigSetting{T}"/> class.
         /// </summary>
         /// <param name="key">The key.</param>
-        /// <param name="defaultValue">The default value.</param>
-        /// <param name="scope">Determines the scope for this setting.</param>
-        public ConfigSetting(string key, T defaultValue, SettingScopes scope = SettingScopes.Any)
+        /// <param name="defaultValue">Optional default value when key is not found or validation fails.</param>
+        /// <param name="scope">Optional <see cref="SettingScopes"/> available to this <see cref="ConfigSetting{T}"/>.</param>
+        public ConfigSetting(string key, T defaultValue = default, SettingScopes scope = SettingScopes.Any)
         {
             Key = key;
             DefaultValue = defaultValue;
@@ -36,9 +62,9 @@ namespace AppConfigSettings
         /// Initializes a new instance of the <see cref="ConfigSetting{T}"/> class.
         /// </summary>
         /// <param name="key">The key.</param>
-        /// <param name="defaultValue">The default value.</param>
-        /// <param name="scope">Determines the scope for this setting.</param>
-        /// <param name="fallbackSetting">The fallback setting.</param>
+        /// <param name="defaultValue">Default value when key is not found or validation fails.</param>
+        /// <param name="scope"><see cref="SettingScopes"/> available to this <see cref="ConfigSetting{T}"/>.</param>
+        /// <param name="fallbackSetting">The fallback <see cref="ConfigSetting{T}"/>.</param>
         public ConfigSetting(
             string key,
             T defaultValue,
@@ -50,10 +76,10 @@ namespace AppConfigSettings
         /// Initializes a new instance of the <see cref="ConfigSetting{T}"/> class.
         /// </summary>
         /// <param name="key">The key.</param>
-        /// <param name="defaultValue">The default value.</param>
-        /// <param name="scope">Determines the scope for this setting.</param>
-        /// <param name="validation">Validation for the setting.</param>
-        /// <param name="throwOnException"></param>
+        /// <param name="defaultValue">Default value when key is not found or validation fails.</param>
+        /// <param name="scope"><see cref="SettingScopes"/> available to this <see cref="ConfigSetting{T}"/>.</param>
+        /// <param name="validation">Validation for the <see cref="ConfigSetting{T}"/>.</param>
+        /// <param name="throwOnException">if set to <c>true</c> throw an error when validation fails. Otherwise, the default value is used.</param>
         public ConfigSetting(
             string key,
             T defaultValue, SettingScopes scope,
@@ -71,11 +97,11 @@ namespace AppConfigSettings
         /// Initializes a new instance of the <see cref="ConfigSetting{T}"/> class.
         /// </summary>
         /// <param name="key">The key.</param>
-        /// <param name="defaultValue">The default value.</param>
-        /// <param name="scope">Determines the scope for this setting.</param>
-        /// <param name="validation">The validation.</param>
-        /// <param name="throwOnException">if set to <c>true</c> [throw on exception].</param>
-        /// <param name="fallbackConfigSetting">The fallback configuration setting.</param>
+        /// <param name="defaultValue">Default value when key is not found or validation fails.</param>
+        /// <param name="scope"><see cref="SettingScopes"/> available to this <see cref="ConfigSetting{T}"/>.</param>
+        /// <param name="validation">Validation for the <see cref="ConfigSetting{T}"/>.</param>
+        /// <param name="throwOnException">if set to <c>true</c> throw an error when validation fails. Otherwise, the default value is used.</param>
+        /// <param name="fallbackConfigSetting">The fallback <see cref="ConfigSetting{T}"/>.</param>
         public ConfigSetting(
             string key, T defaultValue, SettingScopes scope, Func<T, bool> validation, bool throwOnException,
             ConfigSetting<T> fallbackConfigSetting) : this(key,
@@ -89,12 +115,12 @@ namespace AppConfigSettings
         /// Initializes a new instance of the <see cref="ConfigSetting{T}"/> class.
         /// </summary>
         /// <param name="key">The key.</param>
-        /// <param name="defaultValue">The default value.</param>
-        /// <param name="scope">Determines the scope for this setting.</param>
-        /// <param name="validation">The validation.</param>
-        /// <param name="throwOnException">if set to <c>true</c> [throw on exception].</param>
-        /// <param name="fallbackConfigSetting">The fallback configuration setting.</param>
-        /// <param name="defaultDirectory">The default directory.</param>
+        /// <param name="defaultValue">Default value when key is not found or validation fails.</param>
+        /// <param name="scope"><see cref="SettingScopes"/> available to this <see cref="ConfigSetting{T}"/>.</param>
+        /// <param name="validation">Validation for the <see cref="ConfigSetting{T}"/>.</param>
+        /// <param name="throwOnException">if set to <c>true</c> throw an error when validation fails. Otherwise, the default value is used.</param>
+        /// <param name="fallbackConfigSetting">The fallback <see cref="ConfigSetting{T}"/>.</param>
+        /// <param name="defaultDirectory">The default directory containing the configuration settings.</param>
         public ConfigSetting(
             string key, T defaultValue, SettingScopes scope, Func<T, bool> validation, bool throwOnException,
             ConfigSetting<T> fallbackConfigSetting,
@@ -104,24 +130,6 @@ namespace AppConfigSettings
                                             validation,
                                             throwOnException,
                                             fallbackConfigSetting) => DefaultDirectory = defaultDirectory;
-
-        /// <inheritdoc />
-        public List<string> JsonFiles { get; set; }
-
-        /// <inheritdoc />
-        public string DefaultDirectory { get; set; } = Directory.GetCurrentDirectory();
-
-        /// <inheritdoc />
-        public T DefaultValue { get; private set; }
-
-        /// <inheritdoc />
-        public Func<T, bool> Validation { get; set; }
-
-        /// <inheritdoc />
-        public ConfigSetting<T> BackupConfigSetting { get; set; }
-
-        /// <inheritdoc />
-        public NameValueCollection AppConfig { get; set; } = ConfigurationManager.AppSettings;
 
         /// <inheritdoc />
         public IConfigurationRoot Configuration => InitConfig(JsonFiles,
@@ -134,14 +142,6 @@ namespace AppConfigSettings
                                                                JsonFiles.Count == 0),
                                                               false,
                                                               DefaultDirectory);
-
-        /// <inheritdoc />
-        public string Key { get; private set; }
-
-        /// <inheritdoc />
-        public bool ThrowOnException { get; set; }
-
-        public SettingScopes Scopes { get; set; }
 
         /// <inheritdoc />
         public T Get(bool useBackupSetting = true) => Get(useBackupSetting ? BackupConfigSetting : null);
