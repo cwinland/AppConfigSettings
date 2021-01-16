@@ -9,9 +9,10 @@ namespace AppConfigSettingsTests
         protected const string APP_SETTINGS_EXT = "json";
         protected const string ASP_ENVIRONMENT = "ASPNETCORE_ENVIRONMENT";
 
-        protected const string BadVal = "BadVal";
-        protected const string GoodDate = "11/11/1998";
-        protected const string BadDate = "11/11/1997";
+        protected const string BAD_VAL = "BadVal";
+        protected const string GOOD_DATE = "11/11/1998";
+        protected const string BAD_DATE = "11/11/1997";
+        protected const int GOOD_INT = 22;
 
         protected static string CreateFile(string name, string content, string path)
         {

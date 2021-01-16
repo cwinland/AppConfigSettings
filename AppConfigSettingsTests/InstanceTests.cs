@@ -22,16 +22,16 @@ namespace AppConfigSettingsTests
 
         private readonly NameValueCollection appConfig1 = new NameValueCollection
         {
-            { Settings.Path.Key, BadVal },
+            { Settings.Path.Key, BAD_VAL },
             { Settings.Retries.Key, "0" },
             { Settings.Author.Key, "Sam" },
-            { Settings.Created.Key, GoodDate },
+            { Settings.Created.Key, GOOD_DATE },
             { Settings.DefaultStatus.Key, StatusEnum.Unknown.ToString() },
         };
 
         private readonly NameValueCollection appConfig2Bad = new NameValueCollection
         {
-            { Settings2.TestPath.Key, BadVal }, { Settings2.Retries.Key, "-1" },
+            { Settings2.TestPath.Key, BAD_VAL }, { Settings2.Retries.Key, "-1" },
         };
 
         [TestInitialize]
@@ -57,25 +57,25 @@ namespace AppConfigSettingsTests
         [TestMethod]
         public void InstanceTests_CompareWithBackup()
         {
-            settings[Settings.Author.Key].Should().Be(Settings.Author.Get());
-            settings[Settings.Created.Key].Should().Be(Settings.Created.Get());
-            settings[Settings.DefaultStatus.Key].Should().Be(Settings.DefaultStatus.Get());
-            settings[Settings.Path.Key].Should().Be(Settings.Path.Get());
-            settings[Settings.Retries.Key].Should().Be(Settings.Retries.Get());
+            settings[nameof(Settings.Author)].Should().Be(Settings.Author.Get());
+            settings[nameof(Settings.Created)].Should().Be(Settings.Created.Get());
+            settings[nameof(Settings.DefaultStatus)].Should().Be(Settings.DefaultStatus.Get());
+            settings[nameof(Settings.Path)].Should().Be(Settings.Path.Get());
+            settings[nameof(Settings.Retries)].Should().Be(Settings.Retries.Get());
         }
 
         [TestMethod]
         public void InstanceTests_CompareWithoutBackup()
         {
-            settings[Settings.Author.Key].Should().Be(Settings.Author.Get(false));
-            settings[Settings.Created.Key].Should().Be(Settings.Created.Get(false));
-            settings[Settings.DefaultStatus.Key].Should().Be(Settings.DefaultStatus.Get(false));
+            settings[nameof(Settings.Author)].Should().Be(Settings.Author.Get(false));
+            settings[nameof(Settings.Created)].Should().Be(Settings.Created.Get(false));
+            settings[nameof(Settings.DefaultStatus)].Should().Be(Settings.DefaultStatus.Get(false));
 
-            settings[Settings.Path.Key].Should().NotBe(Settings.Path.Get(false));
-            settings[Settings.Retries.Key].Should().NotBe(Settings.Retries.Get(false));
+            settings[nameof(Settings.Path)].Should().NotBe(Settings.Path.Get(false));
+            settings[nameof(Settings.Retries)].Should().NotBe(Settings.Retries.Get(false));
 
-            settings[Settings.Path.Key].Should().Be(Settings2.TestPath.Get());
-            settings[Settings.Retries.Key].Should().Be(Settings2.Retries.Get());
+            settings[nameof(Settings.Path)].Should().Be(Settings2.TestPath.Get());
+            settings[nameof(Settings.Retries)].Should().Be(Settings2.Retries.Get());
         }
 
         [TestMethod]
