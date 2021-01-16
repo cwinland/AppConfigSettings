@@ -24,6 +24,7 @@
 		<GenerateNuspecDependsOn>$(GenerateNuspecDependsOn);SetPackageVersion</GenerateNuspecDependsOn>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<PackageProjectUrl></PackageProjectUrl>
+		<Product>Multiple Configuration Settings</Product>
 	</PropertyGroup>
 <Target Name="SetPackageVersion">
 		<PropertyGroup>
