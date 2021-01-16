@@ -88,7 +88,11 @@ namespace AppConfigSettings
                                                   defaultValue,
                                                   scope)
         {
-            validation ??= _ => true;
+            if (validation == null)
+            {
+                validation = _ => true;
+            }
+
             Validation = validation;
             ThrowOnException = throwOnException;
         }
@@ -220,8 +224,15 @@ namespace AppConfigSettings
         {
             var env = Environment.GetEnvironmentVariable(ASP_ENVIRONMENT);
 
-            jsonFiles ??= new List<string>();
-            appSettingsCollections ??= new List<NameValueCollection>();
+            if (jsonFiles == null)
+            {
+                jsonFiles = new List<string>();
+            }
+
+            if (appSettingsCollections == null)
+            {
+                appSettingsCollections = new List<NameValueCollection>();
+            }
 
             if (addDefaultAppSettings)
             {

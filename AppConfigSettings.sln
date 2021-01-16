@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppConfigSettings", "src\Ap
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppConfigSettingsTests", "AppConfigSettingsTests\AppConfigSettingsTests.csproj", "{94B0D666-93C4-43C3-9442-D7FC4E70A283}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestSettingsConsole", "TestSettingsConsole\TestSettingsConsole.csproj", "{B7355A0B-B2B0-40B5-8259-2558DFFE2718}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestSettingsConsole", "TestSettingsConsole\TestSettingsConsole.csproj", "{B7355A0B-B2B0-40B5-8259-2558DFFE2718}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
