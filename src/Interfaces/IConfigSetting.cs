@@ -45,5 +45,12 @@ namespace AppConfigSettings.Interfaces
         /// </summary>
         /// <value><c>true</c> if [throw on exception]; otherwise, <c>false</c>.</value>
         bool ThrowOnException { get; set; }
+
+        /// <summary>
+        /// Adds the default json.
+        /// </summary>
+        /// <returns>List&lt;System.String&gt;.</returns>
+        /// <remarks>Must be called again to update if the environment variable 'ASPNETCORE_ENVIRONMENT' changes.</remarks>
+        List<string> AddDefaultJson();
     }
 }

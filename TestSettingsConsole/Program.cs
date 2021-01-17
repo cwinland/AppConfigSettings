@@ -36,7 +36,7 @@ namespace TestSettingsConsole
             Console.WriteLine($"MaxRetries: {Settings.MaxRetries.Get()}");
 
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
-
+            Settings.MaxRetries.AddDefaultJson();
             Console.WriteLine("");
             Console.WriteLine("Development:");
 

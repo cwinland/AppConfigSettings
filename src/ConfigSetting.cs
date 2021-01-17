@@ -216,12 +216,8 @@ namespace AppConfigSettings
         public void SetAppSettings(NameValueCollection appSettings) => AppConfig =
             new List<KeyValuePair<string, string>>(1) { new KeyValuePair<string, string>(Key, appSettings[Key]), };
 
-        private T SettingFound(T setting, IConfigSetting validSetting, T defaultValue) =>
-            ProcessSettingValue?.Invoke(new SelectedSetting<T>(setting, validSetting)) ?? true
-                ? setting
-                : defaultValue;
-
-        private List<string> AddDefaultJson()
+        /// <inheritdoc />
+        public List<string> AddDefaultJson()
         {
             var env = Environment.GetEnvironmentVariable(ASP_ENVIRONMENT);
 
@@ -230,15 +226,30 @@ namespace AppConfigSettings
                 JsonFiles = new List<string>();
             }
 
-            JsonFiles.Add($"{APP_SETTINGS_NAME}.{APP_SETTINGS_EXT}");
+            var name = $"{APP_SETTINGS_NAME}.{APP_SETTINGS_EXT}";
+
+            if (!JsonFiles.Contains(name))
+            {
+                JsonFiles.Add(name);
+            }
 
             if (!string.IsNullOrWhiteSpace(env))
             {
-                JsonFiles.Add($"{APP_SETTINGS_NAME}.{env}.{APP_SETTINGS_EXT}");
+                name = $"{APP_SETTINGS_NAME}.{env}.{APP_SETTINGS_EXT}";
+
+                if (!JsonFiles.Contains(name))
+                {
+                    JsonFiles.Add(name);
+                }
             }
 
             return JsonFiles;
         }
+
+        private T SettingFound(T setting, IConfigSetting validSetting, T defaultValue) =>
+            ProcessSettingValue?.Invoke(new SelectedSetting<T>(setting, validSetting)) ?? true
+                ? setting
+                : defaultValue;
 
         /// <summary>
         /// Builds the configuration.
