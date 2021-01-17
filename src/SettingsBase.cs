@@ -13,7 +13,7 @@ namespace AppConfigSettings
 
         protected SettingsBase() => ConfigFields.ForEach(fieldInfo =>
                                                          {
-                                                             var field = fieldInfo.GetValue(null);
+                                                             var field = fieldInfo.GetValue(null) as IConfigSetting;
                                                              var fieldType = field?.GetType();
 
                                                              if (fieldType == null)
@@ -48,11 +48,13 @@ namespace AppConfigSettings
         /// </summary>
         /// <param name="appSettings">The application settings.</param>
         /// <remarks>Default AppSettings is <see cref="ConfigurationManager.AppSettings"/></remarks>
-        public static void SetAppSettings(NameValueCollection appSettings) => ConfigFieldValues.ForEach(field => field?
-            .GetType()
-            .GetRuntimeMethod("SetAppSettings",
-                              new[] { typeof(NameValueCollection), })
-            .Invoke(field, new object[] { appSettings, }));
+        public static void SetAppSettings(NameValueCollection appSettings) => ConfigFields
+                                                                              .Select(x => x.GetValue(null) as
+                                                                                  IConfigSetting)
+                                                                              .ToList()
+                                                                              .ForEach(
+                                                                                  field => field.SetAppSettings(
+                                                                                      appSettings));
 
         private static List<FieldInfo> ConfigFields => typeof(T).GetRuntimeFields()
                                                                 .Where(fieldInfo =>
@@ -60,7 +62,5 @@ namespace AppConfigSettings
                                                                                .IsAssignableFrom(fieldInfo.FieldType) &&
                                                                            fieldInfo.GetValue(null) != null)
                                                                 .ToList();
-
-        private static List<object> ConfigFieldValues => ConfigFields.Select(x => x.GetValue(null)).ToList();
     }
 }
