@@ -43,8 +43,7 @@ namespace AppConfigSettings
         /// <inheritdoc />
         public Func<T, bool> Validation { get; set; }
 
-        private List<KeyValuePair<string, string>> AppConfig { get; set; } =
-            GetKeyPairSettings(ConfigurationManager.AppSettings);
+        private List<KeyValuePair<string, string>> AppConfig { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigSetting{T}"/> class.
@@ -141,7 +140,8 @@ namespace AppConfigSettings
         /// <inheritdoc />
         public IConfigurationRoot Configuration => InitConfig(JsonFiles,
                                                               HasScope(SettingScopes.AppSettings)
-                                                                  ? AppConfig
+                                                                  ? AppConfig ??
+                                                                    GetKeyPairSettings(ConfigurationManager.AppSettings)
                                                                   : new List<KeyValuePair<string, string>>(),
                                                               HasScope(SettingScopes.Environment),
                                                               HasScope(SettingScopes.Json) &&
