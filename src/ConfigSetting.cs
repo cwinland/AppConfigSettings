@@ -138,18 +138,16 @@ namespace AppConfigSettings
                                             fallbackConfigSetting) => DefaultDirectory = defaultDirectory;
 
         /// <inheritdoc />
-        public IConfigurationRoot Configuration => InitConfig(
-            HasScope(SettingScopes.Json) ? JsonFiles ?? AddDefaultJson() : new List<string>(),
-            HasScope(SettingScopes.AppSettings)
-                ? AppConfig ??
-                  GetKeyPairSettings(ConfigurationManager.AppSettings)
-                : new List<KeyValuePair<string, string>>(),
-            HasScope(SettingScopes.Environment),
-            HasScope(SettingScopes.Json) &&
-            (JsonFiles == null ||
-             JsonFiles.Count == 0),
-            false,
-            DefaultDirectory);
+        public IConfigurationRoot Configuration => BuildConfig(DefaultDirectory,
+                                                               HasScope(SettingScopes.AppSettings)
+                                                                   ? AppConfig ??
+                                                                     GetKeyPairSettings(
+                                                                         ConfigurationManager.AppSettings)
+                                                                   : new List<KeyValuePair<string, string>>(),
+                                                               HasScope(SettingScopes.Json)
+                                                                   ? JsonFiles ?? AddDefaultJson()
+                                                                   : new List<string>(),
+                                                               HasScope(SettingScopes.Environment));
 
         /// <inheritdoc />
         public T Get(bool useBackupSetting = true) => Get(useBackupSetting ? BackupConfigSetting : null);
@@ -222,29 +220,6 @@ namespace AppConfigSettings
             ProcessSettingValue?.Invoke(new SelectedSetting<T>(setting, validSetting)) ?? true
                 ? setting
                 : defaultValue;
-
-        private static IConfigurationRoot InitConfig(
-            List<string> jsonFiles, List<KeyValuePair<string, string>> appSettingsCollections,
-            bool includeEnvironmentVariables, bool addDefaultJson, bool addDefaultAppSettings, string currentDirectory)
-        {
-            if (jsonFiles == null)
-            {
-                jsonFiles = new List<string>();
-            }
-
-            if (appSettingsCollections == null)
-            {
-                appSettingsCollections = new List<KeyValuePair<string, string>>();
-            }
-
-            if (addDefaultAppSettings)
-            {
-                GetKeyPairSettings(ConfigurationManager.AppSettings)
-                    .ForEach(x => appSettingsCollections.Add(new KeyValuePair<string, string>(x.Key, x.Value)));
-            }
-
-            return BuildConfig(currentDirectory, appSettingsCollections, jsonFiles, includeEnvironmentVariables);
-        }
 
         private List<string> AddDefaultJson()
         {
