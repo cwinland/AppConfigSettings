@@ -34,6 +34,7 @@
 		</PropertyGroup>
 	</Target>
 	<ItemGroup>
+		<Compile Include="ConfigFieldInfo.cs" />
 		<Compile Include="ConfigSetting.cs" />
 		<Compile Include="Enum\SettingScopes.cs" />
 		<Compile Include="Interfaces\IConfigSetting.cs" />
