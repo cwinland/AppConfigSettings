@@ -43,7 +43,8 @@ namespace AppConfigSettings
         /// <inheritdoc />
         public Func<T, bool> Validation { get; set; }
 
-        private NameValueCollection AppConfig { get; set; } = ConfigurationManager.AppSettings;
+        private List<KeyValuePair<string, string>> AppConfig { get; set; } =
+            GetKeyPairSettings(ConfigurationManager.AppSettings);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigSetting{T}"/> class.
@@ -140,8 +141,8 @@ namespace AppConfigSettings
         /// <inheritdoc />
         public IConfigurationRoot Configuration => InitConfig(JsonFiles,
                                                               HasScope(SettingScopes.AppSettings)
-                                                                  ? new List<NameValueCollection> { AppConfig, }
-                                                                  : new List<NameValueCollection>(),
+                                                                  ? AppConfig
+                                                                  : new List<KeyValuePair<string, string>>(),
                                                               HasScope(SettingScopes.Environment),
                                                               HasScope(SettingScopes.Json) &&
                                                               (JsonFiles == null ||
@@ -153,43 +154,35 @@ namespace AppConfigSettings
         public T Get(bool useBackupSetting = true) => Get(useBackupSetting ? BackupConfigSetting : null);
 
         /// <inheritdoc />
-        public T Get(ConfigSetting<T> backupConfigSetting)
-        {
-            T setting;
-
-            try
-            {
-                setting = TryGet(out var appSetting) &&
-                          Validation(appSetting)
-                    ? SettingFound(appSetting, this, DefaultValue)
-                    : backupConfigSetting == null ||
-                      !backupConfigSetting.TryGet(out var backupVal)
-                        ? DefaultValue
-                        : SettingFound(backupVal, backupConfigSetting, DefaultValue);
-            }
-            catch (Exception)
-            {
-                if (ThrowOnException)
-                {
-                    throw;
-                }
-
-                setting = DefaultValue;
-            }
-
-            return setting;
-        }
+        public T Get(ConfigSetting<T> backupConfigSetting) => TryGet(out var appSetting) &&
+                                                              Validation(appSetting)
+            ? SettingFound(appSetting, this, DefaultValue)
+            : backupConfigSetting == null ||
+              !backupConfigSetting.TryGet(out var backupVal)
+                ? DefaultValue
+                : SettingFound(backupVal, backupConfigSetting, DefaultValue);
 
         /// <inheritdoc />
         public bool TryGet(out T val)
         {
-            var result = TryConvert(Configuration[Key], out var newVal) && Validation(newVal);
+            var canConvert = TryConvert(Configuration[Key], out var newVal);
+            var isValidated = canConvert && Validation(newVal);
 
-            val = result
+            if (!isValidated && ThrowOnException)
+            {
+                if (canConvert)
+                {
+                    throw new InvalidDataException();
+                }
+
+                throw new InvalidCastException();
+            }
+
+            val = isValidated
                 ? newVal
                 : DefaultValue;
 
-            return result;
+            return isValidated;
         }
 
         /// <inheritdoc />
@@ -220,7 +213,9 @@ namespace AppConfigSettings
             return valid;
         }
 
-        public void SetAppSettings(NameValueCollection appSettings) => AppConfig = appSettings;
+        /// <inheritdoc />
+        public void SetAppSettings(NameValueCollection appSettings) => AppConfig =
+            new List<KeyValuePair<string, string>>(1) { new KeyValuePair<string, string>(Key, appSettings[Key]), };
 
         private T SettingFound(T setting, IConfigSetting validSetting, T defaultValue) =>
             ProcessSettingValue?.Invoke(new SelectedSetting<T>(setting, validSetting)) ?? true
@@ -228,7 +223,7 @@ namespace AppConfigSettings
                 : defaultValue;
 
         private static IConfigurationRoot InitConfig(
-            List<string> jsonFiles, List<NameValueCollection> appSettingsCollections,
+            List<string> jsonFiles, List<KeyValuePair<string, string>> appSettingsCollections,
             bool includeEnvironmentVariables, bool addDefaultJson, bool addDefaultAppSettings, string currentDirectory)
         {
             var env = Environment.GetEnvironmentVariable(ASP_ENVIRONMENT);
@@ -240,12 +235,13 @@ namespace AppConfigSettings
 
             if (appSettingsCollections == null)
             {
-                appSettingsCollections = new List<NameValueCollection>();
+                appSettingsCollections = new List<KeyValuePair<string, string>>();
             }
 
             if (addDefaultAppSettings)
             {
-                appSettingsCollections.Add(ConfigurationManager.AppSettings);
+                GetKeyPairSettings(ConfigurationManager.AppSettings)
+                    .ForEach(x => appSettingsCollections.Add(new KeyValuePair<string, string>(x.Key, x.Value)));
             }
 
             if (addDefaultJson)
@@ -258,11 +254,7 @@ namespace AppConfigSettings
                 }
             }
 
-            var inMemoryCollection = appSettingsCollections
-                                     .Select(GetKeyPairSettings)
-                                     .ToList();
-
-            return BuildConfig(currentDirectory, inMemoryCollection, jsonFiles, includeEnvironmentVariables);
+            return BuildConfig(currentDirectory, appSettingsCollections, jsonFiles, includeEnvironmentVariables);
         }
 
         /// <summary>
@@ -275,7 +267,7 @@ namespace AppConfigSettings
         /// <returns>IConfigurationRoot.</returns>
         /// <remarks>Order added to the builder matters. Last added is the tie breaker.</remarks>
         private static IConfigurationRoot BuildConfig(
-            string currentDirectory, List<List<KeyValuePair<string, string>>> inMemoryCollection,
+            string currentDirectory, IEnumerable<KeyValuePair<string, string>> inMemoryCollection,
             List<string> jsonFiles, bool includeEnvironmentVariables)
         {
             var builder = new ConfigurationBuilder();
@@ -287,7 +279,7 @@ namespace AppConfigSettings
                 builder.AddEnvironmentVariables();
             }
 
-            inMemoryCollection.ForEach(list => builder.AddInMemoryCollection(list));
+            builder.AddInMemoryCollection(inMemoryCollection);
 
             jsonFiles.ForEach(list => builder.AddJsonFile(list, true, true));
 

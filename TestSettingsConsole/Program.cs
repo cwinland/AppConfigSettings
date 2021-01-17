@@ -6,18 +6,17 @@ namespace TestSettingsConsole
 {
     internal class Program
     {
-        private static void Main(string[] args)
+        private static void Main()
         {
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "");
 
             var logLevel = Settings.LogLevel.Get(false);
             var path = Settings.DefaultFolder.Get(Settings.SystemRoot);
             var maxRetries = Settings.MaxRetries.Get(new ConfigSetting<int>("OtherRetry", 2));
-            var settings = new Settings();
-            var level = settings[nameof(Settings.LogLevel)].ToString();
+            var level = new Settings()[nameof(Settings.LogLevel)].ToString();
 
-            Console.WriteLine(logLevel);
-            Console.WriteLine(level);
+            Console.WriteLine($"Static: {logLevel}");
+            Console.WriteLine($"Instance: {level}");
             Console.WriteLine(path);
             Console.WriteLine(maxRetries);
 

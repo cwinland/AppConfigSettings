@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace AppConfigSettings.Interfaces
 {
@@ -38,6 +39,8 @@ namespace AppConfigSettings.Interfaces
         /// </summary>
         /// <param name="val">The value.</param>
         /// <returns><c>true</c> if valid value and validation, <c>false</c> otherwise.</returns>
+        /// <exception cref="InvalidDataException"></exception>
+        /// <exception cref="InvalidCastException"></exception>
         bool TryGet(out T val);
 
         /// <summary>

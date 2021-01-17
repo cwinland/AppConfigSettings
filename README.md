@@ -315,10 +315,9 @@ public class Settings : SettingsBase<Settings>
             setting.ProcessSettingValue = selectedSetting =>
                                             {
                                                 testInt = selectedSetting.Value + 3;
-                                                appConfig[selectedSetting.Key] =
-                                                    NEW_INT.ToString(); // This will update the NEXT call.
+                                                testKey = selectedSetting.Key;
 
-                                                return true;
+                                                return selectedSetting.Key == "foo";
                                             };
 
 ```
