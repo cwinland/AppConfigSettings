@@ -308,6 +308,7 @@ public class Settings : SettingsBase<Settings>
 - Current
   - Remove AppConfig setting from ConfigSetting public interface.
   - Add SetAppSettings(NameValueCollection appSettings) to ConfigSetting public interface.
+  - Add Missing ThrowOnException code.
   - Add Action ProcessSettingValue to process data based on found value.
     - Example:
   
