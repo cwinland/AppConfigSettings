@@ -306,7 +306,28 @@ public class Settings : SettingsBase<Settings>
 ## Release Notes
 
 - Current
-  - Allow no default value - Uses the data type default
+  - Remove AppConfig setting from ConfigSetting public interface.
+  - Add SetAppSettings(NameValueCollection appSettings) to ConfigSetting public interface.
+  - Add Action ProcessSettingValue to process data based on found value.
+    - Example:
+  
+```c#
+            setting.ProcessSettingValue = selectedSetting =>
+                                            {
+                                                testInt = selectedSetting.Value + 3;
+                                                appConfig[selectedSetting.Key] =
+                                                    NEW_INT.ToString(); // This will update the NEXT call.
+
+                                                return true;
+                                            };
+
+```
+
+- 1.21.1.1619
+  - Convert project to .NET Standard 2.0 for greater compatibility.
+
+- 1.21.1.1602
+  - Allow declaring ConfigSetting without a default value - Uses the data type default.
   - Instance dictionary uses the name of the variable instead of the configuration settings Key.
   - Update documentation
   - Bug Fixes

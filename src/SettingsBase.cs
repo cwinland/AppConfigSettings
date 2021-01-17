@@ -10,7 +10,6 @@ namespace AppConfigSettings
     public abstract class SettingsBase<T> : Dictionary<string, object> where T : class, new()
     {
         private const string CONFIG_SETTING_VALUE = "Get";
-        private const string CONFIG_SETTING_CONFIG = "AppConfig";
 
         protected SettingsBase() => ConfigFields.ForEach(fieldInfo =>
                                                          {
@@ -51,8 +50,9 @@ namespace AppConfigSettings
         /// <remarks>Default AppSettings is <see cref="ConfigurationManager.AppSettings"/></remarks>
         public static void SetAppSettings(NameValueCollection appSettings) => ConfigFieldValues.ForEach(field => field?
             .GetType()
-            .GetRuntimeProperty(CONFIG_SETTING_CONFIG)
-            ?.SetValue(field, appSettings));
+            .GetRuntimeMethod("SetAppSettings",
+                              new[] { typeof(NameValueCollection), })
+            .Invoke(field, new object[] { appSettings, }));
 
         private static List<FieldInfo> ConfigFields => typeof(T).GetRuntimeFields()
                                                                 .Where(fieldInfo =>

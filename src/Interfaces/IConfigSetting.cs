@@ -10,7 +10,9 @@ namespace AppConfigSettings.Interfaces
         /// <summary>
         /// Configuration App Settings
         /// </summary>
-        NameValueCollection AppConfig { get; set; }
+
+        //NameValueCollection AppConfig { get; set; }
+        void SetAppSettings(NameValueCollection appSettings);
 
         /// <summary>
         /// Overall Configurations

@@ -18,9 +18,6 @@ namespace AppConfigSettings
         private const string ASP_ENVIRONMENT = "ASPNETCORE_ENVIRONMENT";
 
         /// <inheritdoc />
-        public NameValueCollection AppConfig { get; set; } = ConfigurationManager.AppSettings;
-
-        /// <inheritdoc />
         public ConfigSetting<T> BackupConfigSetting { get; set; }
 
         /// <inheritdoc />
@@ -35,6 +32,9 @@ namespace AppConfigSettings
         /// <inheritdoc />
         public string Key { get; private set; }
 
+        /// <inheritdoc />
+        public Func<SelectedSetting<T>, bool> ProcessSettingValue { get; set; }
+
         public SettingScopes Scopes { get; set; }
 
         /// <inheritdoc />
@@ -42,6 +42,8 @@ namespace AppConfigSettings
 
         /// <inheritdoc />
         public Func<T, bool> Validation { get; set; }
+
+        private NameValueCollection AppConfig { get; set; } = ConfigurationManager.AppSettings;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigSetting{T}"/> class.
@@ -159,11 +161,11 @@ namespace AppConfigSettings
             {
                 setting = TryGet(out var appSetting) &&
                           Validation(appSetting)
-                    ? appSetting
+                    ? SettingFound(appSetting, this, DefaultValue)
                     : backupConfigSetting == null ||
                       !backupConfigSetting.TryGet(out var backupVal)
                         ? DefaultValue
-                        : backupVal;
+                        : SettingFound(backupVal, backupConfigSetting, DefaultValue);
             }
             catch (Exception)
             {
@@ -217,6 +219,13 @@ namespace AppConfigSettings
 
             return valid;
         }
+
+        public void SetAppSettings(NameValueCollection appSettings) => AppConfig = appSettings;
+
+        private T SettingFound(T setting, IConfigSetting validSetting, T defaultValue) =>
+            ProcessSettingValue?.Invoke(new SelectedSetting<T>(setting, validSetting)) ?? true
+                ? setting
+                : defaultValue;
 
         private static IConfigurationRoot InitConfig(
             List<string> jsonFiles, List<NameValueCollection> appSettingsCollections,

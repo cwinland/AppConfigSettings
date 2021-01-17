@@ -30,14 +30,14 @@ namespace AppConfigSettings.Interfaces
         /// </summary>
         /// <param name="val">The value.</param>
         /// <param name="newVal">The new value.</param>
-        /// <returns><c>true</c> if XXXX, <c>false</c> otherwise.</returns>
+        /// <returns><c>true</c> if possible to convert, <c>false</c> otherwise.</returns>
         bool TryConvert(string val, out T newVal);
 
         /// <summary>
         /// Tries the get.
         /// </summary>
         /// <param name="val">The value.</param>
-        /// <returns><c>true</c> if XXXX, <c>false</c> otherwise.</returns>
+        /// <returns><c>true</c> if valid value and validation, <c>false</c> otherwise.</returns>
         bool TryGet(out T val);
 
         /// <summary>
@@ -51,6 +51,15 @@ namespace AppConfigSettings.Interfaces
         /// </summary>
         /// <value>The default value.</value>
         T DefaultValue { get; }
+
+        /// <summary>
+        /// Gets or sets the process setting value callback function. This function is designed to allow the caller to act on the found setting.
+        /// </summary>
+        /// <example>
+        /// 
+        /// </example>
+        /// <value>The process setting value.</value>
+        Func<SelectedSetting<T>, bool> ProcessSettingValue { get; set; }
 
         /// <summary>
         /// Gets or sets the validation.

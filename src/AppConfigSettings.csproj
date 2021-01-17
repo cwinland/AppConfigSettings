@@ -1,19 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-	<TargetFramework>netstandard2.0</TargetFramework>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Copyright>Copyright(c) 2021 Christopher Winland</Copyright>
-    <RepositoryUrl>https://github.com/cwinland/AppConfigSettings</RepositoryUrl>
-    <RepositoryType>GitHub</RepositoryType>
-    <PackageTags>Application Configuration Settings Validation Typed AppConfig</PackageTags>
-    <Company>Microsoft</Company>
-    <Authors>Christopher Winland</Authors>
-    <Description>Typed and validated application configuration settings. Allows backup configuration such as parent / child settings. Based off ConfigurationManager, JSON, and Environment Variables.</Description>
-	<Title>App Settings Multi-Configuration</Title>
-	<PackageTags>AppConfig Validation Configuration Settings Backup Fallback ConfigurationManager Typed AppSettings JSON Environment Variables</PackageTags>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+		<Copyright>Copyright(c) 2021 Christopher Winland</Copyright>
+		<RepositoryUrl>https://github.com/cwinland/AppConfigSettings</RepositoryUrl>
+		<RepositoryType>GitHub</RepositoryType>
+		<PackageTags>Application Configuration Settings Validation Typed AppConfig</PackageTags>
+		<Company>Microsoft</Company>
+		<Authors>Christopher Winland</Authors>
+		<Description>Typed and validated application configuration settings. Allows backup configuration such as parent / child settings. Based off ConfigurationManager, JSON, and Environment Variables.</Description>
+		<Title>App Settings Multi-Configuration</Title>
+		<PackageTags>AppConfig Validation Configuration Settings Backup Fallback ConfigurationManager Typed AppSettings JSON Environment Variables</PackageTags>
+	</PropertyGroup>
 	<PropertyGroup>
 		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
 		<AssemblyVersion>1.$([System.DateTime]::Now.ToString("y.MM.ddHH"))</AssemblyVersion>
@@ -26,34 +26,35 @@
 		<PackageProjectUrl></PackageProjectUrl>
 		<Product>Multiple Configuration Settings</Product>
 	</PropertyGroup>
-<Target Name="SetPackageVersion">
+	<Target Name="SetPackageVersion">
 		<PropertyGroup>
 			<!-- <PackageVersion>$([System.DateTime]::Now.ToString(&quot;yyyy.MM.dd.HHmmss&quot;))</PackageVersion> -->
 			<!-- You can customize the format and the rule about how version increases here. -->
 			<PackageVersion>1.$([System.DateTime]::Now.ToString("y.MM.ddHH"))</PackageVersion>
 		</PropertyGroup>
 	</Target>
-<ItemGroup>
-  <Compile Include="ConfigSetting.cs" />
-  <Compile Include="Enum\SettingScopes.cs" />
-  <Compile Include="Interfaces\IConfigSetting.cs" />
-  <Compile Include="Interfaces\IConfigSettingT.cs" />
-  <Compile Include="SettingsBase.cs" />
-</ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Include="ConfigSetting.cs" />
+		<Compile Include="Enum\SettingScopes.cs" />
+		<Compile Include="Interfaces\IConfigSetting.cs" />
+		<Compile Include="Interfaces\IConfigSettingT.cs" />
+		<Compile Include="SelectedSetting.cs" />
+		<Compile Include="SettingsBase.cs" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
+		<PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+	</ItemGroup>
 
 </Project>
