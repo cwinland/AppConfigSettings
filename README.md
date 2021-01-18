@@ -23,24 +23,9 @@ Multiple Source Configuration Reader to manage validated and strongly typed appl
 
 Configuration settings are independent of each other. The settings may be used in a static class, an instance class, or as standalone declarations in a variable.
 
-### Constructors
+### Scope
 
-When initializing a configuration setting, the only **required** parameter is the **Key**.
-
-#### Basic Constructor with Key, Default Value (optional), and Scope (optional)
-
-```c#
-public ConfigSetting(string key, T defaultValue = default, SettingScopes scope = SettingScopes.Any)
-{
-    Key = key;
-    DefaultValue = defaultValue;
-    Validation = _ => true;
-    ThrowOnException = false;
-    Scopes = scope;
-}
-```
-
-An optional default value will allow the setting to use an expected value when the key is not found or fails validation.
+The optional scope (defaults to Any) allows the setting to be configured to restrict the search scope to any combination of available configuration type. 
 
 ```c#
 [Flags]
@@ -53,71 +38,30 @@ public enum SettingScopes
 }
 ```
 
-The optional scope allows the setting to limit the search scope to any combination of the available configuration scopes:
+### Common Constructors
 
-#### Basic Constructor Plus Fallback Setting
+When initializing a configuration setting, the only **required** parameter is the **Key**.
 
-```c#
-public ConfigSetting(
-    string key,
-    T defaultValue,
-    SettingScopes scope,
-    ConfigSetting<T> fallbackSetting) :
-    this(key, defaultValue, scope) => BackupConfigSetting = fallbackSetting;
-```
+#### Basic Constructor with Key, Default Value (optional), and Scope (optional)
 
-The fallbackSetting allows the setting to try another configuration setting before failing.
-
-#### Basic Constructor Plus Validation Settings
+- An optional default value will allow the setting to use an expected value when the key is not found or fails validation.
+- An optional scope allows to set the setting to a default scope.
 
 ```c#
-public ConfigSetting(
-    string key,
-    T defaultValue, SettingScopes scope,
-    Func<T, bool> validation,
-    bool throwOnException = false) : this(key,
-                                            defaultValue,
-                                            scope)
-{
-    validation ??= _ => true;
-    Validation = validation;
-    ThrowOnException = throwOnException;
-}
+public ConfigSetting(string key, T defaultValue = default, SettingScopes scope = SettingScopes.Any);
 ```
-
-Validation specifies a particular validation function for the value of the setting.
-ThrowOnException specifies whether to throw an error when validation fails. Otherwise, the default value is used.
 
 #### Basic Constructor Plus Validation and Fallback Settings
 
-```c#
-public ConfigSetting(
-    string key, T defaultValue, SettingScopes scope, Func<T, bool> validation, bool throwOnException,
-    ConfigSetting<T> fallbackConfigSetting) : this(key,
-                                                    defaultValue,
-                                                    scope,
-                                                    validation,
-                                                    throwOnException) =>
-    BackupConfigSetting = fallbackConfigSetting;
-```
-
-This combines the validation and fallback constructors into one constructor.
-
-#### Complete Constructor with Default Directory
+- The fallbackSetting allows the setting to try another configuration setting before failing.
+- Validation specifies a particular validation function for the value of the setting.
+- ThrowOnException specifies whether to throw an error when validation fails. Otherwise, the default value is used.
 
 ```c#
 public ConfigSetting(
     string key, T defaultValue, SettingScopes scope, Func<T, bool> validation, bool throwOnException,
-    ConfigSetting<T> fallbackConfigSetting,
-    string defaultDirectory) : this(key,
-                                    defaultValue,
-                                    scope,
-                                    validation,
-                                    throwOnException,
-                                    fallbackConfigSetting) => DefaultDirectory = defaultDirectory;
+    ConfigSetting<T> fallbackConfigSetting);
 ```
-
-Default directory specifies the folder which to search for the configuration settings.
 
 ### Reading Settings
 
@@ -232,76 +176,28 @@ var allowedHosts = new ConfigSetting<string>("AllowedHosts", "None", SettingScop
 
 ### Validation Setting
 
-Both of these settings gets the value from all configuration sources, based on the provided key. Both settings validates the value in different ways. Validation functions are typed as specified in the declaration.
-
-```c#
-new ConfigSetting<int>
-new ConfigSetting<LogLevels>
-new ConfigSetting<string>
-new ConfigSetting<double?>
-```
-
-The first setting validates that the configuration value is _greater (>) than 0._ If the key is _not found_ or the value _fails validation,__ it returns the integer **2**.
-
-The second setting validates that the configuration value exists as a real folder. If the key is _not found_ or the value _fails validation,__ it returns the string **C:\Test**.
+Both settings validates the value in different ways. Validation functions are typed as specified in the declaration.
 
 ```c#
 var maxRetries = new ConfigSetting<int>("MaxRetries", 2, SettingScopes.Any, i => i > 0);
 var folder = new ConfigSetting<string>("Folder", @"C:\Test", SettingScopes.Any, Directory.Exists);
 ```
 
+The first setting validates that the configuration value is _greater (>) than 0._ If the key is _not found_ or the value _fails validation,__ it returns the integer **2**.
+The second setting validates that the configuration value exists as a real folder. If the key is _not found_ or the value _fails validation,__ it returns the string **C:\Test**.
+
 ## Example Settings
 
 ```c#
 public class Settings : SettingsBase<Settings>
 {
-    public static readonly ConfigSetting<string> DefaultFolder =
-        new ConfigSetting<string>("DefaultFolder",
-                                    Directory.GetCurrentDirectory(),
-                                    SettingScopes.Any,
-                                    Directory.Exists);
+    public static readonly ConfigSetting<LoggingLevels> AppLoggingLevel =
+        new ConfigSetting<LoggingLevels>("AppLoggingLevel");
 
     public static readonly ConfigSetting<int> MaxRetries =
         new ConfigSetting<int>("MaxRetries", 2, SettingScopes.Any, i => i > 0);
-
-    public static readonly ConfigSetting<LoggingLevels> AppLoggingLevel =
-        new ConfigSetting<LoggingLevels>("AppLoggingLevel", LoggingLevels.None, SettingScopes.AppSettings);
-
-    public static readonly ConfigSetting<LoggingLevels> LogLevel =
-        new ConfigSetting<LoggingLevels>("Logging:LogLevel:Default",
-                                            LoggingLevels.Information,
-                                            SettingScopes.Json,
-                                            AppLoggingLevel);
-
-    public static readonly ConfigSetting<string> AllowedHosts =
-        new ConfigSetting<string>("AllowedHosts", "None", SettingScopes.AppSettings | SettingScopes.Json);
-
-    public static readonly ConfigSetting<string> TestSetting = new ConfigSetting<string>("TestSetting", "None");
-
-    public static readonly ConfigSetting<string> SystemRoot =
-        new ConfigSetting<string>("SystemRoot",
-                                    "None",
-                                    SettingScopes.AppSettings,
-                                    null,
-                                    false,
-                                    null,
-                                    Environment.CurrentDirectory);
-
-    public static readonly ConfigSetting<string> SystemRoot2 =
-        new ConfigSetting<string>("SystemRoot", "None", SettingScopes.Environment);
-
+}
 ```
-
-| **Setting** | **Data Type** | **Scope** | **Validation** | **Default** | **Fallback Value** |
-| - | - | - | - | - | - |
-| DefaultFolder | String | Any | Directory existence | Current Directory | None | |
-| MaxRetries | Integer | Any | MaxRetries > 0 | None | None | |
-| AppLoggingLevel | LoggingLevel (Enum) | AppSettings | None | None | None | |
-| LogLevel | LoggingLevel (Enum) | Json | Default type checking to ensure Enum value is valid. No Custom Validation. | Information | AppLoggingLevel | |
-| AllowedHosts | string | AppSettings, Json | None | None | | |
-| TestSetting | string | Any (Default) | None | None | None | |
-| SystemRoot | String | AppSettings | None | None | None |
-| SystemRoot2 | String | Environment | None | None | None |
 
 ## Release Notes
 
@@ -310,18 +206,6 @@ public class Settings : SettingsBase<Settings>
   - Add SetAppSettings(NameValueCollection appSettings) to ConfigSetting public interface.
   - Add Missing ThrowOnException code.
   - Add Action ProcessSettingValue to process data based on found value.
-    - Example:
-  
-```c#
-            setting.ProcessSettingValue = selectedSetting =>
-                                            {
-                                                testInt = selectedSetting.Value + 3;
-                                                testKey = selectedSetting.Key;
-
-                                                return selectedSetting.Key == "foo";
-                                            };
-
-```
 
 - 1.21.1.1619
   - Convert project to .NET Standard 2.0 for greater compatibility.
@@ -341,12 +225,5 @@ public class Settings : SettingsBase<Settings>
 
 ## MIT License
 
-MIT License
-
+[MIT License]https://github.com/cwinland/AppConfigSettings/blob/master/LICENSE
 Copyright (c) 2021 Christopher Winland
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
