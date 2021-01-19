@@ -29,11 +29,6 @@ namespace AppConfigSettingsTests
             { Settings.DefaultStatus.Key, StatusEnum.Unknown.ToString() },
         };
 
-        private readonly NameValueCollection appConfig2Bad = new NameValueCollection
-        {
-            { Settings2.TestPath.Key, BAD_VAL }, { Settings2.Retries.Key, "-1" },
-        };
-
         [TestInitialize]
         public void Settings_InitTest()
         {
