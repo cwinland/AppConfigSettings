@@ -23,21 +23,6 @@ Multiple Source Configuration Reader to manage validated and strongly typed appl
 
 Configuration settings are independent of each other. The settings may be used in a static class, an instance class, or as standalone declarations in a variable.
 
-### Scope
-
-The optional scope (defaults to Any) allows the setting to be configured to restrict the search scope to any combination of available configuration type. 
-
-```c#
-[Flags]
-public enum SettingScopes
-{
-    Any = 0,
-    AppSettings = 1,
-    Json = 2,
-    Environment = 4,
-}
-```
-
 ### Common Constructors
 
 When initializing a configuration setting, the only **required** parameter is the **Key**.
