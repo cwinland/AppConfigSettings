@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 
+// ReSharper disable UnusedMemberInSuper.Global
+
 namespace AppConfigSettings.Interfaces
 {
     public interface IConfigSetting<T> : IConfigSetting

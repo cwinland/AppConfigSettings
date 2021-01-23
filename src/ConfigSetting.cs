@@ -51,13 +51,13 @@ namespace AppConfigSettings
         /// <param name="key">The key.</param>
         /// <param name="defaultValue">Optional default value when key is not found or validation fails.</param>
         /// <param name="scope">Optional <see cref="SettingScopes"/> available to this <see cref="ConfigSetting{T}"/>.</param>
-        public ConfigSetting(string key, T defaultValue = default, SettingScopes scope = SettingScopes.Any)
+        public ConfigSetting(string key, T defaultValue = default, SettingScopes scope = null)
         {
             Key = key;
             DefaultValue = defaultValue;
             Validation = _ => true;
             ThrowOnException = false;
-            Scopes = scope;
+            Scopes = scope ?? SettingScopes.Any;
         }
 
         /// <summary>

@@ -3,21 +3,22 @@ using System.Collections.Specialized;
 using AppConfigSettings.Enum;
 using Microsoft.Extensions.Configuration;
 
+// ReSharper disable UnusedMemberInSuper.Global
+
 namespace AppConfigSettings.Interfaces
 {
     public interface IConfigSetting
     {
         /// <summary>
-        /// Configuration App Settings
+        /// Sets the application settings.
         /// </summary>
-
-        //NameValueCollection AppConfig { get; set; }
+        /// <param name="appSettings">The application settings.</param>
         void SetAppSettings(NameValueCollection appSettings);
 
         /// <summary>
         /// Overall Configurations
         /// </summary>
-        /// <value>The configuration.</value>
+        /// <value>The configuration <see cref="IConfigurationRoot"/>.</value>
         IConfigurationRoot Configuration { get; }
 
         /// <summary>
@@ -38,6 +39,10 @@ namespace AppConfigSettings.Interfaces
         /// <value>The key.</value>
         string Key { get; }
 
+        /// <summary>
+        /// Gets or sets the scopes.
+        /// </summary>
+        /// <value>The scopes <see cref="SettingScopes"/>.</value>
         SettingScopes Scopes { get; set; }
 
         /// <summary>
